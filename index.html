@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tyrtrek Security — Physical Security Vulnerability Assessments</title>
+<meta name="description" content="Tyrtrek Security conducts physical security vulnerability assessments grounded in ESRM and CPTED practice, and provides a self-service assessment toolkit for facilities, contractors, and assessment firms.">
+
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#2f4858">
+
+<meta property="og:title" content="Tyrtrek Security — Physical Security Vulnerability Assessments">
+<meta property="og:description" content="Vulnerability assessments grounded in ESRM and CPTED practice, plus a self-service assessment toolkit — in your browser or installed as an app.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/og-image.jpg">
+<meta property="og:url" content="https://tyrtrek.com/">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+  :root{
+    --ink:#1c2430;
+    --ink-soft:#4b5563;
+    --paper:#faf8f4;
+    --paper-line:#e4ded2;
+    --folder:#2f4858;
+    --folder-dark:#233a47;
+    --accent:#c17a4f;
+    --accent-deep:#8a5a3b;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'SF Mono',Consolas,Monaco,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--ink);
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 32px;}
+
+  /* ---------- SKIP LINK ---------- */
+  .skip-link{
+    position:absolute; left:-9999px; top:0; background:var(--folder); color:#fff;
+    padding:10px 16px; z-index:100; border-radius:0 0 4px 0;
+  }
+  .skip-link:focus{ left:0; }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(250,248,244,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--paper-line);
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px;
+    max-width:1080px; margin:0 auto;
+  }
+  .brand-mark{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark img{ height:30px; width:auto; }
+  .brand-mark .wordmark{ font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink); letter-spacing:.01em; }
+  .brand-mark .wordmark span{ color:var(--accent); font-family:var(--sans); font-weight:700; font-size:11px; letter-spacing:.14em; display:block; margin-top:1px; }
+  .topbar nav{ display:flex; align-items:center; gap:28px; }
+  .topbar nav a{
+    font-size:13.5px; font-weight:600; text-decoration:none; color:var(--ink-soft);
+    letter-spacing:.01em;
+  }
+  .topbar nav a:hover{ color:var(--ink); }
+  .topbar .btn{ margin-left:6px; }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--sans); font-size:14px; font-weight:700;
+    padding:12px 22px; border-radius:3px; text-decoration:none;
+    letter-spacing:.01em; border:1.5px solid transparent; cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s, transform .1s;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:var(--accent); color:#fff; }
+  .btn-primary:hover{ background:var(--accent-deep); }
+  .btn-outline{ background:transparent; border-color:var(--folder); color:var(--folder); }
+  .btn-outline:hover{ background:var(--folder); color:#fff; }
+  .btn-outline-light{ background:transparent; border-color:rgba(250,248,244,.5); color:var(--paper); }
+  .btn-outline-light:hover{ background:rgba(250,248,244,.12); border-color:var(--paper); }
+  .btn-small{ padding:9px 16px; font-size:12.5px; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    padding:96px 32px 88px;
+    text-align:center;
+  }
+  .hero-motif{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-46%);
+    width:900px; height:900px; pointer-events:none; z-index:0;
+    opacity:.5;
+  }
+  .hero-inner{ position:relative; z-index:1; max-width:720px; margin:0 auto; }
+  .hero .eyebrow{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--accent-deep); font-weight:700; margin-bottom:22px;
+  }
+  .hero h1{
+    font-family:var(--serif); font-size:47px; line-height:1.14; font-weight:600;
+    margin:0 0 22px; color:var(--ink);
+    letter-spacing:-.01em;
+  }
+  .hero h1 em{ font-style:italic; color:var(--accent-deep); }
+  .hero p.lede{
+    font-size:17px; line-height:1.6; color:var(--ink-soft); margin:0 auto 38px;
+    max-width:58ch;
+  }
+  .hero-ctas{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:84px 0; }
+  .section-head{ max-width:640px; margin:0 0 44px; }
+  .section-head.center{ margin-left:auto; margin-right:auto; text-align:center; }
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; margin-bottom:12px;
+  }
+  h2{ font-family:var(--serif); font-size:32px; line-height:1.2; margin:0 0 14px; font-weight:600; }
+  .section-head p{ font-size:15.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
+
+  /* ---------- APPROACH ---------- */
+  .approach-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:start; }
+  .approach-body p{ font-size:15.5px; line-height:1.75; color:var(--ink-soft); margin:0 0 16px; }
+  .approach-body p:last-child{ margin-bottom:0; }
+  .approach-body strong{ color:var(--ink); font-weight:700; }
+
+  .scope-panel{
+    background:#fff; border:1px solid var(--paper-line); border-radius:6px;
+    padding:26px 26px 22px;
+  }
+  .scope-panel .panel-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .scope-panel .panel-label b{ color:var(--ink); font-family:var(--sans); font-weight:700; letter-spacing:0; font-size:12px; }
+  .scope-list{ list-style:none; margin:0; padding:0; columns:2; column-gap:18px; }
+  .scope-list li{
+    font-size:13.5px; color:var(--ink); padding:7px 0; border-bottom:1px solid var(--paper-line);
+    break-inside:avoid; display:flex; align-items:baseline; gap:8px;
+  }
+  .scope-list li::before{
+    content:''; width:5px; height:5px; border-radius:50%; background:var(--accent);
+    flex-shrink:0; margin-bottom:1px;
+  }
+  .scope-note{ font-size:12px; color:var(--ink-soft); margin-top:16px; font-style:italic; line-height:1.5; }
+
+  /* ---------- ACCESS (teal band) ---------- */
+  .access{ background:var(--folder); color:var(--paper); }
+  .access .eyebrow{ color:#e6a878; }
+  .access h2{ color:#fff; }
+  .access .section-head p{ color:#c6d3d8; }
+
+  .access-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .access-card{
+    background:var(--paper); color:var(--ink);
+    border-radius:6px; padding:30px 28px;
+    display:flex; flex-direction:column;
+  }
+  .access-card .tag{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-deep); font-weight:700; margin-bottom:14px;
+  }
+  .access-card h3{ font-family:var(--serif); font-size:22px; margin:0 0 10px; font-weight:600; }
+  .access-card p{ font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0 0 22px; flex-grow:1; }
+  .access-card .btn{ align-self:flex-start; }
+
+  details.install-steps{ margin-top:18px; border-top:1px solid var(--paper-line); padding-top:16px; }
+  details.install-steps summary{
+    font-size:13px; font-weight:700; color:var(--folder); cursor:pointer; list-style:none;
+    display:flex; align-items:center; gap:6px;
+  }
+  details.install-steps summary::-webkit-details-marker{ display:none; }
+  details.install-steps summary::before{ content:'+'; font-family:var(--mono); font-size:14px; }
+  details.install-steps[open] summary::before{ content:'–'; }
+  details.install-steps ol{ margin:14px 0 0; padding-left:18px; font-size:13px; line-height:1.6; color:var(--ink-soft); }
+  details.install-steps li{ margin-bottom:8px; }
+  details.install-steps li:last-child{ margin-bottom:0; }
+  details.install-steps li b{ color:var(--ink); }
+
+  /* ---------- CONTACT ---------- */
+  .contact{ text-align:center; }
+  .contact-mark{ width:52px; margin:0 auto 24px; opacity:.9; }
+  .contact h2{ margin-bottom:14px; }
+  .contact p{ font-size:15px; color:var(--ink-soft); max-width:48ch; margin:0 auto 30px; line-height:1.6; }
+  .contact-email{
+    font-family:var(--serif); font-size:26px; font-weight:600; color:var(--folder);
+    text-decoration:none; border-bottom:2px solid var(--accent); padding-bottom:4px;
+  }
+  .contact-email:hover{ color:var(--accent-deep); }
+
+  /* ---------- FOOTER ---------- */
+  footer{ background:var(--folder-dark); color:#a9b7bd; padding:36px 0; }
+  .footer-inner{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+  }
+  .footer-brand{ display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.04em; }
+  .footer-brand img{ height:16px; width:auto; opacity:.85; }
+  footer .disclaimer{ font-size:11.5px; line-height:1.6; color:#7f929a; max-width:56ch; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 760px){
+    .wrap, .topbar-inner{ padding-left:20px; padding-right:20px; }
+    .topbar nav{ gap:16px; }
+    .topbar nav a:not(.btn){ display:none; }
+    .hero{ padding:64px 20px 60px; }
+    .hero h1{ font-size:32px; }
+    .hero p.lede{ font-size:15.5px; }
+    section{ padding:56px 0; }
+    .approach-grid{ grid-template-columns:1fr; gap:36px; }
+    .access-grid{ grid-template-columns:1fr; }
+    .scope-list{ columns:1; }
+    .footer-inner{ flex-direction:column; align-items:flex-start; text-align:left; }
+    .hero-motif{ width:620px; height:620px; opacity:.35; }
+  }
+
+  /* ---------- REDUCED MOTION ---------- */
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+  }
+
+  /* ---------- FOCUS ---------- */
+  a:focus-visible, button:focus-visible, summary:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="#top" class="brand-mark">
+      <img src="assets/logo-icon.png" alt="" width="30" height="31">
+      <span class="wordmark">Tyrtrek<span>SECURITY</span></span>
+    </a>
+    <nav>
+      <a href="#approach">Approach</a>
+      <a href="#access">Access</a>
+      <a href="#contact">Contact</a>
+      <a href="app/" class="btn btn-outline btn-small">Open the tool</a>
+    </nav>
+  </div>
+</div>
+
+<main id="main">
+
+  <section class="hero" id="top">
+    <svg class="hero-motif" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="200" cy="200" r="150" fill="none" stroke="#c17a4f" stroke-width="1" stroke-dasharray="3 6" opacity="0.35"/>
+      <circle cx="200" cy="200" r="108" fill="none" stroke="#2f4858" stroke-width="0.75" opacity="0.22"/>
+      <line x1="200" y1="20" x2="200" y2="380" stroke="#2f4858" stroke-width="0.75" opacity="0.18"/>
+      <line x1="20" y1="200" x2="380" y2="200" stroke="#2f4858" stroke-width="0.75" opacity="0.18"/>
+      <line x1="63" y1="63" x2="337" y2="337" stroke="#2f4858" stroke-width="0.5" opacity="0.12"/>
+      <line x1="337" y1="63" x2="63" y2="337" stroke="#2f4858" stroke-width="0.5" opacity="0.12"/>
+      <path d="M200 130 L212 188 L270 200 L212 212 L200 270 L188 212 L130 200 L188 188 Z" fill="#c17a4f" opacity="0.16"/>
+    </svg>
+    <div class="hero-inner">
+      <div class="eyebrow">Physical Security &amp; Vulnerability Assessments</div>
+      <h1>Know where your facility is exposed — <em>before</em> someone else finds out.</h1>
+      <p class="lede">Tyrtrek Security assesses buildings, campuses, and critical infrastructure using ESRM and CPTED practice, and turns what we find into a clear, actionable report — not a stack of jargon.</p>
+      <div class="hero-ctas">
+        <a href="app/" class="btn btn-primary">Open the Assessment Tool</a>
+        <a href="#access" class="btn btn-outline">Get it as an app</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="approach">
+    <div class="wrap approach-grid">
+      <div>
+        <div class="section-head">
+          <div class="eyebrow">Our Approach</div>
+          <h2>A method, not a checklist.</h2>
+        </div>
+        <div class="approach-body">
+          <p>Every assessment is grounded in <strong>Enterprise Security Risk Management (ESRM)</strong> and <strong>Crime Prevention Through Environmental Design (CPTED)</strong> — established practices for identifying where a facility is exposed and why, not just listing what's missing.</p>
+          <p>The result is a documented, professional report: what was observed, the risk it poses, and practical mitigation options — organized so that facility staff, ownership, and outside contractors can all act on it without a security background.</p>
+          <p>The same toolkit built to run these assessments is available below, for direct use by in-house staff, independent contractors, or other assessment firms.</p>
+        </div>
+      </div>
+      <div class="scope-panel">
+        <div class="panel-label"><b>Scope of Review</b><span>15 Categories</span></div>
+        <ul class="scope-list">
+          <li>Area &amp; Neighboring Risk</li>
+          <li>Perimeter</li>
+          <li>Doors</li>
+          <li>Windows</li>
+          <li>Parking</li>
+          <li>Landscaping</li>
+          <li>Lighting</li>
+          <li>Alarm Systems</li>
+          <li>Cameras</li>
+          <li>Critical Infrastructure</li>
+          <li>Protected / Controlled Areas</li>
+          <li>Deliveries</li>
+          <li>Guard Force</li>
+          <li>Emergency Plans</li>
+          <li>Screening Procedures</li>
+        </ul>
+        <p class="scope-note">Categories are scoped per facility — sections outside an engagement's scope are marked and documented, not silently dropped.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="access" class="access">
+    <div class="wrap">
+      <div class="section-head center">
+        <div class="eyebrow">Access the Toolkit</div>
+        <h2>Two ways in.</h2>
+        <p>The same vulnerability assessment report builder, however it fits your workflow.</p>
+      </div>
+      <div class="access-grid">
+        <div class="access-card">
+          <div class="tag">In the browser</div>
+          <h3>Use it right now</h3>
+          <p>No install, no account. Opens straight to the ten-step assessment builder — enter facility details, document findings by category, and generate the finished report.</p>
+          <a href="app/" class="btn btn-primary">Open the tool →</a>
+        </div>
+        <div class="access-card">
+          <div class="tag">On your device</div>
+          <h3>Install it as an app</h3>
+          <p>Add it to your home screen for one-tap access and offline use in the field — useful when a site visit means weak signal or none at all.</p>
+          <a href="app/" class="btn btn-outline">Get started →</a>
+          <details class="install-steps">
+            <summary>How to install</summary>
+            <ol>
+              <li><b>iPhone / iPad:</b> open the tool in Safari, tap Share, then "Add to Home Screen."</li>
+              <li><b>Android:</b> open the tool in Chrome, tap the menu (⋮), then "Install app."</li>
+              <li><b>Desktop:</b> open the tool in Chrome or Edge and click the install icon in the address bar.</li>
+            </ol>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <img class="contact-mark" src="assets/logo-icon.png" alt="">
+      <div class="section-head center">
+        <h2>Get in touch</h2>
+      </div>
+      <p>Questions about an assessment, or interested in using the toolkit for your own team or firm? Reach out directly.</p>
+      <a href="mailto:rt@tyrtrek.com" class="contact-email">rt@tyrtrek.com</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo-icon.png" alt="">
+      TYRTREK SECURITY
+    </div>
+    <p class="disclaimer">© 2026 Tyrtrek Security. Assessments and reports produced with this toolkit are provided for informational purposes only, represent a good-faith review at the time of assessment, and do not constitute a binding guarantee of security.</p>
+  </div>
+</footer>
+
+</body>
+</html>
