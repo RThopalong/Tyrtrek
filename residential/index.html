@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Residential Vulnerability Assessment Report Generator</title>
+
+<!-- PWA: installability -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f4858">
+  <meta name="background-color" content="#e9e4d8">
+  <link rel="icon" type="image/png" sizes="192x192" href="../app/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="../app/icon-512.png">
+
+  <!-- iOS home-screen behavior (Safari doesn't read manifest.json for these) -->
+<link rel="apple-touch-icon" href="../app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Home VA">
+  <meta name="mobile-web-app-capable" content="yes">
+  <style>
+  :root{
+  --ink:#1c2430;
+--ink-soft:#4b5563;
+--paper:#faf8f4;
+  --paper-line:#e4ded2;
+  --folder:#2f4858;
+--folder-dark:#233a47;
+--tab-active:#c17a4f;
+  --accent:#8a5a3b;
+--low:#5b7f5e;
+--medium:#b98a35;
+  --high:#b95c38;
+  --critical:#a13c3c;
+  --border:#d8d2c4;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+--mono:'SF Mono',Consolas,Monaco,monospace;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+font-family:var(--sans);
+color:var(--ink);
+background:#e9e4d8;
+-webkit-font-smoothing:antialiased;
+}
+/* ---------- APP SHELL ---------- */
+.app{
+  display:flex;
+min-height:100vh;
+}
+.rail{
+  width:230px;
+flex-shrink:0;
+background:var(--folder);
+color:#dfe6ea;
+padding:28px 0 20px;
+display:flex;
+flex-direction:column;
+position:sticky;
+top:0;
+height:100vh;
+overflow-y:auto;
+}
+.rail-brand{
+  padding:0 20px 22px;
+border-bottom:1px solid rgba(255,255,255,.12);
+margin-bottom:8px;
+}
+.rail-brand .eyebrow{
+font-size:10px;
+letter-spacing:.14em;
+text-transform:uppercase;
+color:#9fb4bf;
+margin-bottom:4px;
+}
+.rail-brand h1{
+  font-family:var(--serif);
+font-size:18px;
+font-weight:600;
+margin:0;
+line-height:1.25;
+color:#fff;
+}
+.tab{
+  position:relative;
+display:flex;
+align-items:center;
+gap:10px;
+padding:11px 20px 11px 24px;
+font-size:13.5px;
+color:#c7d2d8;
+cursor:pointer;
+border-left:3px solid transparent;
+transition:background .15s, color .15s;
+}
+.tab .num{
+font-family:var(--mono);
+font-size:10px;
+color:#7d95a1;
+width:16px;
+}
+.tab:hover{ background:rgba(255,255,255,.05); color:#fff; }
+.tab.active{
+background:var(--folder-dark);
+color:#fff;
+border-left-color:var(--tab-active);
+}
+.tab.active .num{ color:var(--tab-active); }
+.rail-footer{
+  margin-top:auto;
+padding:16px 20px 0;
+}
+.btn{
+  display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+border:1px solid transparent;
+border-radius:3px;
+padding:10px 16px;
+  font-size:13px;
+  font-weight:600;
+cursor:pointer;
+  font-family:var(--sans);
+letter-spacing:.01em;
+}
+.btn-primary{ background:var(--tab-active); color:#fff; }
+.btn-primary:hover{ background:#a8663d; }
+.btn-ghost{ background:transparent; border-color:rgba(255,255,255,.3); color:#eef2f4; width:100%; }
+.btn-ghost:hover{ background:rgba(255,255,255,.08); }
+.btn-outline{ background:#fff; border-color:var(--border); color:var(--ink); }
+  .btn-outline:hover{ background:#f4f1ea; }
+  .btn-small{ padding:6px 10px; font-size:12px; }
+.btn-danger{ color:var(--critical); background:transparent; border-color:transparent; }
+
+/* ---------- MAIN / FORM ---------- */
+.main{ flex:1; padding:44px 56px 90px; max-width:900px; }
+.panel{ display:none; }
+  .panel.active{ display:block; animation:fade .2s ease; }
+@keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+.panel-head{ margin-bottom:28px; border-bottom:1px solid var(--border); padding-bottom:16px; }
+.panel-head .eyebrow{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:6px; }
+.panel-head h2{ font-family:var(--serif); font-size:28px; margin:0 0 6px; }
+.panel-head p{ margin:0; color:var(--ink-soft); font-size:14px; max-width:60ch; line-height:1.5; }
+
+label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin:18px 0 6px; }
+label .hint{ font-weight:400; color:var(--ink-soft); font-size:11.5px; display:block; margin-top:2px; }
