@@ -1,11 +1,17 @@
 // Vulnerability Assessment Report Generator — Service Worker
-// Bump CACHE_VERSION any time index.html (or this file) changes,
+// Bump CACHE_VERSION any time index.html, ../shared/finding-kit.js, or this file changes,
 // so returning users pick up the new version instead of a stale cache.
-const CACHE_VERSION = 'va-report-v1';
+const CACHE_PREFIX = 'va-report-';
+const CACHE_VERSION = CACHE_PREFIX + 'v2';
+// Required for the tool to run offline — install fails if any of these can't be fetched.
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
+  '../shared/finding-kit.js'
+];
+// Nice to have offline; fetched individually so one failure can't break install.
+const OPTIONAL = [
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
@@ -15,30 +21,25 @@ const APP_SHELL = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => cache.addAll(APP_SHELL)
+        .then(() => Promise.all(OPTIONAL.map((url) => cache.add(url).catch(() => null)))))
       .then(() => self.skipWaiting())
   );
 });
 
+// Only clear this tool's own old caches — the commercial tool, residential
+// tool, and Field Capture share one origin, so they must not delete each other's.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_VERSION)
-          .map((key) => caches.delete(key))
-      )
+      Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_VERSION).map((key) => caches.delete(key)))
     ).then(() => self.clients.claim())
   );
 });
 
-// Cache-first: this app is a single self-contained page with no external
-// dependencies, so once the shell is cached the tool should work fully
-// offline in the field. Falls back to network for anything not cached
-// (e.g. first load), and re-caches it for next time.
+// Cache-first: works fully offline in the field once loaded.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;

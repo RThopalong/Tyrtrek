@@ -384,6 +384,47 @@
     .photo-resize-wrap{ width:100%; max-width:100%; height:220px; }
     input, select, textarea, button{ font-size:16px; } /* prevents iOS auto-zoom on focus */
   }
+
+  /* ---------- FIELD FINDINGS (import, tray, voice, photo layers) ---------- */
+  .import-box{ border-left:4px solid var(--tab-active); }
+  .import-box .btn{ margin:4px 8px 4px 0; }
+  .import-box p{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5; }
+  .import-box a{ font-size:12.5px; font-weight:700; color:var(--folder); }
+  .lib-list{ margin-top:12px; border:1px solid var(--paper-line); border-radius:4px; background:#fbfaf6; max-height:420px; overflow:auto; }
+  .lib-site{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:700; padding:10px 12px 4px; }
+  .lib-row{ display:flex; gap:10px; align-items:center; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13px; cursor:pointer; }
+  .lib-row input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
+  .lib-row img, .tray-row img{ width:52px; height:52px; object-fit:cover; border-radius:3px; border:1px solid var(--border); flex-shrink:0; background:#e4ded2; }
+  .lib-row .lib-txt, .tray-row .tray-txt{ flex:1; min-width:0; }
+  .lib-row .lib-snip, .tray-row .tray-snip{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lib-row .lib-meta, .tray-row .tray-meta{ font-size:11px; color:var(--ink-soft); }
+  .lib-actions{ display:flex; gap:10px; align-items:center; padding:10px 12px; border-top:1px solid var(--paper-line); background:#fff; position:sticky; bottom:0; }
+  .tray{ background:#fff8e6; border:1px solid #e2c27a; border-radius:5px; padding:14px 18px; margin-bottom:16px; }
+  .tray h3{ font-family:var(--serif); font-size:16px; margin:0 0 4px; }
+  .tray > p{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
+  .tray-row{ display:flex; gap:10px; align-items:center; padding:8px 0; border-top:1px solid #efdcae; font-size:13px; flex-wrap:wrap; }
+  .tray-row select{ width:auto; max-width:260px; font-size:13px; padding:7px 8px; }
+  .src-badge{ display:inline-block; margin-left:8px; font-family:var(--sans); font-size:9.5px; letter-spacing:.08em; background:var(--folder); color:#fff; padding:2px 7px; border-radius:10px; vertical-align:1px; }
+  .mini{ border:1px solid var(--border); background:#fff; border-radius:3px; font-size:11px; padding:4px 7px; cursor:pointer; color:var(--ink); }
+  .mini:disabled{ opacity:.35; cursor:default; }
+  .vuln-card .tt-vf{ margin:14px 0 0; }
+  .vuln-card .tt-vf textarea{ font-size:14px; min-height:90px; }
+  .vphoto{ width:250px; background:#fff; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+  .vphoto-img{ position:relative; height:180px; background:#1c2430; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .vphoto-img img{ max-width:100%; max-height:100%; display:block; }
+  .vbadge{ position:absolute; top:6px; left:6px; font-size:9.5px; font-weight:800; letter-spacing:.1em; background:var(--tab-active); color:#fff; padding:2px 6px; border-radius:8px; }
+  .vphoto-meta{ font-size:11.5px; color:var(--ink-soft); padding:6px 8px 0; line-height:1.4; }
+  .vphoto-actions{ display:flex; flex-wrap:wrap; gap:4px; padding:6px 8px 8px; }
+  .vphoto-actions button{ font-size:11.5px; }
+  .autosave-line{ font-size:12px; color:var(--ink-soft); margin-top:10px; }
+  .rail .autosave-line{ color:#9fb4bf; font-size:11px; margin:10px 0 0; text-align:center; }
+  .photo-resize-wrap.fit{ width:100%; height:auto; max-width:100%; max-height:none; min-height:0; }
+  .photo-resize-wrap.fit img{ height:auto; object-fit:fill; }
+  figure.fit-fig{ max-width:100%; }
+  @media (max-width: 820px){
+    .photo-resize-wrap.fit{ height:auto; }
+    .vphoto{ width:100%; }
+  }
 </style>
 </head>
 <body>
@@ -415,6 +456,7 @@
       <input type="file" id="loadInput" accept="application/json" style="display:none" onchange="loadProgress(event)">
       <button class="btn btn-ghost" style="margin-top:8px" onclick="saveProgress()">↧ Save Progress</button>
       <button class="btn btn-primary" style="width:100%; margin-top:14px" onclick="generateReport()">Generate Report →</button>
+      <div class="autosave-line" data-autosave-status></div>
     </div>
   </nav>
 
@@ -550,6 +592,16 @@
         <h2>Assessment Categories</h2>
         <p>Uncheck any category that doesn't apply to this residence, or add a custom one. Each category is narrative-only — observations and recommendations in plain language, with an overall priority used to build the Conclusion summary table.</p>
       </div>
+      <div class="field-group import-box">
+        <label style="margin-top:0">Field Findings</label>
+        <p>Bring in findings captured on site with the Field Capture app. Each one slots into its category automatically and marks that category as assessed; anything captured without a category waits in the Unsorted tray below.</p>
+        <button class="btn btn-primary btn-small" onclick="document.getElementById('findingFileInput').click()">↥ Import finding files</button>
+        <button class="btn btn-outline btn-small" onclick="openDeviceLibrary()">From this device’s capture library</button>
+        <input type="file" id="findingFileInput" accept="application/json,.json" multiple style="display:none" onchange="importFindingFiles(event)">
+        <div id="deviceLibrary"></div>
+        <p style="margin:10px 0 0;"><a href="../capture/" target="_blank" rel="noopener">Open Field Capture →</a></p>
+      </div>
+      <div id="unsortedTray"></div>
       <div id="categoryList"></div>
       <div class="add-cat-row">
         <input type="text" id="newCatName" placeholder="Add a custom category (e.g. Loading Dock, IT/Server Room)">
@@ -676,7 +728,7 @@
       <div class="panel-head">
         <div class="eyebrow">Step 10</div>
         <h2>Save &amp; Resume</h2>
-        <p>Nothing is stored automatically — this tool keeps no server or browser storage. Save your progress to a file you keep (local drive, shared folder, etc.) and load it later to pick up where you left off, on this or any other computer.</p>
+        <p>Your work saves automatically on this device as you go — close the browser and it will be here when you come back. Nothing is sent to any server. To move an assessment to another computer, or keep a backup, save a progress file below and load it there.</p>
       </div>
 
       <div class="field-group">
@@ -740,6 +792,13 @@
         <button class="btn btn-outline" onclick="saveProgress()">↧ Save Progress Now</button>
         <button class="btn btn-outline" style="margin-left:10px" onclick="document.getElementById('loadInput2').click()">↥ Load Progress File</button>
         <input type="file" id="loadInput2" accept="application/json" style="display:none" onchange="loadProgress(event)">
+        <div class="autosave-line" data-autosave-status></div>
+      </div>
+
+      <div class="field-group">
+        <label style="margin-top:0">Start Over</label>
+        <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 12px;">Clears the in-progress assessment saved on this device so you can begin a new one. Save a progress file first if you may need this one again. Findings in the Field Capture library are not affected.</p>
+        <button class="btn btn-outline" style="color:var(--critical);" onclick="startNewAssessment()">Start a New Assessment</button>
       </div>
     </section>
 
@@ -762,7 +821,9 @@
   <div id="reportSheets"></div>
 </div>
 
+<script src="../shared/finding-kit.js"></script>
 <script>
+const TOOL_TRACK = 'residential';
 /* ---------------- DEFAULT CONTENT ---------------- */
 const DEFAULT_DISCLAIMER = `This Residential Vulnerability Assessment Report ("Report") is provided for informational and planning purposes only. It reflects observations and professional judgment made at a specific point in time, under the conditions present during the site visit(s) described herein, and does not constitute a guarantee, warranty, or certification that the residence is free from security vulnerabilities or that any incident will not occur.
 
@@ -809,7 +870,8 @@ let state = {
   categories: DEFAULT_CATEGORIES.map(name => ({
     id: crypto.randomUUID(), name, status: 'assessed', noReportReason: '', noReportOther: '',
     vulnerabilities: [ makeVuln() ]
-  }))
+  })),
+  unsorted: []
 };
 function makeTeamMember(){
   return { id: crypto.randomUUID(), name:"", title:"", email:"", phone:"", website:"", photo:null };
@@ -822,7 +884,8 @@ const NO_REPORT_REASONS = [
   "Other"
 ];
 function makeVuln(){
-  return { id: crypto.randomUUID(), vulnerability:"", risk:"", mitigation:"", priority:"Unrated", photos: [] };
+  return { id: crypto.randomUUID(), vulnerability:"", risk:"", mitigation:"", followUp:"", priority:"Unrated", photos: [],
+    audio: { vulnerability:[], risk:[], mitigation:[], followUp:[] }, sourceFindingId: null };
 }
 
 /* ---------------- INIT ---------------- */
@@ -993,6 +1056,7 @@ function removePhoto(key,i){ state[key].splice(i,1); renderPhotoGrid(key); }
 /* ---------------- CATEGORIES ---------------- */
 function renderCategories(){
   const list = document.getElementById('categoryList');
+  const openIds = new Set(Array.from(list.querySelectorAll('.cat-card.open')).map(el=>el.id));
   list.innerHTML = "";
   state.categories.forEach(cat=>{
     const card = document.createElement('div');
@@ -1015,6 +1079,7 @@ function renderCategories(){
       <div class="cat-card-body" id="cat-body-${cat.id}"></div>`;
     list.appendChild(card);
     if(cat.status==='no-report'){ renderNoReportPanel(cat.id); } else { renderVulnList(cat.id); }
+    if(openIds.has(card.id)) card.classList.add('open');
   });
 }
 function renderNoReportPanel(catId){
@@ -1037,31 +1102,59 @@ function updateCatReason(catId, field, val){
   cat[field] = val;
   if(field==='noReportReason') renderNoReportPanel(catId);
 }
+function vfAdapter(v, key){
+  // Bridges the shared voice-field component to this tool's flat vuln fields.
+  if(!v.audio) v.audio = { vulnerability:[], risk:[], mitigation:[], followUp:[] };
+  if(!v.audio[key]) v.audio[key] = [];
+  if(v[key] == null) v[key] = '';
+  return { get text(){ return v[key]; }, set text(t){ v[key] = t; }, audio: v.audio[key] };
+}
+function vulnFields(){ return [
+  { key:'vulnerability', label:'Vulnerability', hint:'What is the observed vulnerability?' },
+  { key:'risk',          label:'Risk',          hint:'What risk does this vulnerability expose the household to?' },
+  { key:'mitigation',    label:'Mitigation',    hint:'What steps, changes, or equipment will reduce this risk?' },
+  { key:'followUp',      label:'Follow-up notes', hint:'Internal only — never printed in the report', internal:true }
+]; }
 function renderVulnList(catId){
   const cat = state.categories.find(c=>c.id===catId);
   const body = document.getElementById('cat-body-'+catId);
+  const n = cat.vulnerabilities.length;
   body.innerHTML = cat.vulnerabilities.map((v,i)=>`
     <div class="vuln-card" id="vuln-${v.id}">
       <div class="vuln-card-top">
-        <span class="vuln-index">Item ${i+1}</span>
+        <span class="vuln-index">Item ${i+1}${v.sourceFindingId ? '<span class="src-badge">FIELD CAPTURE</span>' : ''}</span>
         <select class="priority-select" onchange="updateVuln('${catId}','${v.id}','priority',this.value)">
           ${["Unrated","Low","Medium","High","Critical"].map(p=>`<option ${v.priority===p?'selected':''}>${p}</option>`).join('')}
         </select>
-        ${cat.vulnerabilities.length>1 ? `<button class="cat-remove" onclick="removeVuln('${catId}','${v.id}')">Remove Item</button>` : ''}
+        <button class="mini" title="Move up" ${i===0?'disabled':''} onclick="moveVuln('${catId}','${v.id}',-1)">▲</button>
+        <button class="mini" title="Move down" ${i===n-1?'disabled':''} onclick="moveVuln('${catId}','${v.id}',1)">▼</button>
+        <button class="mini" title="Save this item as a portable finding file" onclick="exportVulnAsFinding('${v.id}')">Export</button>
+        ${n>1 ? `<button class="cat-remove" onclick="removeVuln('${catId}','${v.id}')">Remove Item</button>` : ''}
       </div>
-      <label style="margin-top:10px">Vulnerability <span class="hint">What is the observed vulnerability?</span></label>
-      <textarea oninput="updateVuln('${catId}','${v.id}','vulnerability',this.value)" placeholder="Describe the specific vulnerability observed.">${v.vulnerability}</textarea>
-      <label>Risk <span class="hint">What risk does this vulnerability expose the household to?</span></label>
-      <textarea oninput="updateVuln('${catId}','${v.id}','risk',this.value)" placeholder="Describe the risk this vulnerability creates.">${v.risk}</textarea>
-      <label>Mitigation <span class="hint">What steps, changes, or equipment will reduce this risk?</span></label>
-      <textarea oninput="updateVuln('${catId}','${v.id}','mitigation',this.value)" placeholder="Describe the recommended mitigation.">${v.mitigation}</textarea>
-      <label>Photos <span class="hint">Optional — add one or more, each with its own caption</span></label>
+      ${vulnFields().map(f=>`<div data-vf="${v.id}:${f.key}"></div>`).join('')}
+      <label>Photos <span class="hint">Click a photo to crop, mark up, set its print size, or add a caption. The first photo leads.</span></label>
       <div class="photo-drop" onclick="document.getElementById('vulnphoto-${v.id}').click()">Click to upload photo(s)</div>
       <input type="file" id="vulnphoto-${v.id}" accept="image/*" multiple style="display:none" onchange="handleVulnPhoto('${catId}','${v.id}',event)">
       <div id="vulnphoto-grid-${v.id}" class="photo-grid"></div>
     </div>`).join('') + `
     <button class="btn btn-outline btn-small" style="margin-top:4px" onclick="addVuln('${catId}')">+ Add Another Vulnerability</button>`;
-  cat.vulnerabilities.forEach(v => renderVulnPhotoGrid(v.id));
+  cat.vulnerabilities.forEach(v=>{
+    vulnFields().forEach(f=>{
+      const el = body.querySelector(`[data-vf="${v.id}:${f.key}"]`);
+      TT.mountVoiceField(el, { label:f.label, hint:f.hint, internal:!!f.internal, placeholder: f.internal ? 'Notes for you — kept out of the client report' : '', get: ()=>vfAdapter(v, f.key), onChange: markDirty });
+    });
+    renderVulnPhotoGrid(v.id);
+  });
+}
+function moveVuln(catId, vulnId, dir){
+  const cat = state.categories.find(c=>c.id===catId);
+  const i = cat.vulnerabilities.findIndex(v=>v.id===vulnId);
+  const j = i + dir;
+  if(i<0 || j<0 || j>=cat.vulnerabilities.length) return;
+  [cat.vulnerabilities[i], cat.vulnerabilities[j]] = [cat.vulnerabilities[j], cat.vulnerabilities[i]];
+  renderVulnList(catId);
+  renderPrioritySummary();
+  markDirty();
 }
 function toggleCat(id, e){
   document.getElementById('cat-'+id).classList.toggle('open');
@@ -1076,6 +1169,7 @@ function updateCatStatus(id, status){
 function removeCategory(id){
   state.categories = state.categories.filter(c=>c.id!==id);
   renderCategories();
+  renderUnsortedTray();
   renderPrioritySummary();
 }
 function addCategory(){
@@ -1085,6 +1179,7 @@ function addCategory(){
   state.categories.push({ id: crypto.randomUUID(), name, status:'assessed', noReportReason:'', noReportOther:'', vulnerabilities:[ makeVuln() ] });
   input.value = "";
   renderCategories();
+  renderUnsortedTray();
   renderPrioritySummary();
 }
 function addVuln(catId){
@@ -1105,37 +1200,262 @@ function updateVuln(catId, vulnId, field, val){
   const v = cat.vulnerabilities.find(v=>v.id===vulnId);
   v[field] = val;
   if(field==='priority') renderPrioritySummary();
+  markDirty();
+}
+function findVuln(vulnId){
+  for(const c of state.categories){ const v = c.vulnerabilities.find(x=>x.id===vulnId); if(v) return { v, cat:c }; }
+  const u = (state.unsorted||[]).find(x=>x.id===vulnId);
+  return u ? { v:u, cat:null } : { v:null, cat:null };
 }
 async function handleVulnPhoto(catId, vulnId, e){
   const files = Array.from(e.target.files);
-  const cat = state.categories.find(c=>c.id===catId);
-  const v = cat.vulnerabilities.find(v=>v.id===vulnId);
+  const { v } = findVuln(vulnId);
+  if(!v) return;
   for(const file of files){
-    const dataUrl = await readFileAsDataURL(file);
-    v.photos.push({ dataUrl, caption: "" });
+    try{ v.photos.push(await TT.fileToPhoto(file)); }
+    catch(err){ TT.toast('One photo could not be read in this browser.'); }
   }
   renderVulnPhotoGrid(vulnId);
   e.target.value = "";
+  markDirty();
 }
 function renderVulnPhotoGrid(vulnId){
   const grid = document.getElementById('vulnphoto-grid-'+vulnId);
   if(!grid) return;
-  let v;
-  state.categories.forEach(c => { const found = c.vulnerabilities.find(x=>x.id===vulnId); if(found) v = found; });
+  const { v } = findVuln(vulnId);
   if(!v) return;
   grid.innerHTML = v.photos.map((p,i)=>`
-    <div class="photo-card">
-      <img src="${p.dataUrl}">
-      <input type="text" placeholder="Caption / subtitle" value="${(p.caption||'').replace(/"/g,'&quot;')}" oninput="updateVulnPhotoCaption('${vulnId}',${i},this.value)">
-      <button class="remove" onclick="removeVulnPhoto('${vulnId}',${i})">Remove</button>
+    <div class="vphoto">
+      <div class="vphoto-img" onclick="editVulnPhoto('${vulnId}',${i},'move')"><img data-vthumb="${vulnId}:${i}" alt="">${i===0?'<span class="vbadge">LEAD</span>':''}</div>
+      <div class="vphoto-meta">${(p.printWidthIn||4).toFixed(2)}″ wide in report · ${p.caption.enabled && p.caption.text.trim() ? 'Caption: “'+esc(p.caption.text)+'”' : 'No caption'}${p.annotations.length ? ' · '+p.annotations.length+' mark'+(p.annotations.length===1?'':'s') : ''}</div>
+      <div class="vphoto-actions">
+        <button class="mini" onclick="editVulnPhoto('${vulnId}',${i},'move')">Crop &amp; mark up</button>
+        <button class="mini" onclick="editVulnPhoto('${vulnId}',${i},'layout')">Size &amp; caption</button>
+        <button class="mini" ${i===0?'disabled':''} onclick="moveVulnPhoto('${vulnId}',${i},-1)">◀</button>
+        <button class="mini" ${i===v.photos.length-1?'disabled':''} onclick="moveVulnPhoto('${vulnId}',${i},1)">▶</button>
+        ${i>0 ? `<button class="mini" onclick="moveVulnPhoto('${vulnId}',${i},'lead')">★ Lead</button>` : ''}
+        <button class="mini" style="color:var(--critical)" onclick="removeVulnPhoto('${vulnId}',${i})">Remove</button>
+      </div>
     </div>`).join('');
+  v.photos.forEach(async (p,i)=>{
+    const img = grid.querySelector(`[data-vthumb="${vulnId}:${i}"]`);
+    try{ if(img) img.src = await TT.renderThumb(p, 500); }catch(e){}
+  });
 }
-function updateVulnPhotoCaption(vulnId, i, val){
-  state.categories.forEach(c=>{ const v = c.vulnerabilities.find(x=>x.id===vulnId); if(v) v.photos[i].caption = val; });
+function editVulnPhoto(vulnId, i, startTool){
+  const { v } = findVuln(vulnId);
+  if(!v || !v.photos[i]) return;
+  TT.openPhotoEditor(v.photos[i], {
+    startTool, sampleText: v.vulnerability,
+    onSave(updated){ v.photos[i] = updated; renderVulnPhotoGrid(vulnId); markDirty(); }
+  });
+}
+function moveVulnPhoto(vulnId, i, dir){
+  const { v } = findVuln(vulnId);
+  if(!v) return;
+  const ph = v.photos;
+  if(dir === 'lead'){ ph.unshift(ph.splice(i,1)[0]); }
+  else { const j = i + dir; if(j<0 || j>=ph.length) return; [ph[i], ph[j]] = [ph[j], ph[i]]; }
+  renderVulnPhotoGrid(vulnId);
+  markDirty();
 }
 function removeVulnPhoto(vulnId, i){
-  state.categories.forEach(c=>{ const v = c.vulnerabilities.find(x=>x.id===vulnId); if(v) v.photos.splice(i,1); });
+  const { v } = findVuln(vulnId);
+  if(!v || !confirm('Remove this photo?')) return;
+  v.photos.splice(i,1);
   renderVulnPhotoGrid(vulnId);
+  markDirty();
+}
+
+/* ---------------- FIELD FINDINGS: IMPORT / TRAY / EXPORT ----------------
+   A finding file (from the Field Capture app) becomes one vulnerability
+   item. It lands in the category it was tagged with — which marks that
+   category Assessed so the Scope Coverage Summary stays honest — or in
+   the Unsorted tray if it wasn't tagged or the category isn't in this
+   report. Re-importing the same finding updates it in place. */
+function vulnFromFinding(f){
+  const v = makeVuln();
+  v.sourceFindingId = f.id;
+  v.capturedAt = f.createdAt;
+  v.fieldSite = f.site || '';
+  v.fieldCategory = f.category || '';
+  v.priority = TT.PRIORITIES.includes(f.priority) ? f.priority : 'Unrated';
+  ['vulnerability','risk','mitigation','followUp'].forEach(k=>{
+    v[k] = f.fields[k].text || '';
+    v.audio[k] = f.fields[k].audio || [];
+  });
+  v.photos = f.photos.map(p=>TT.normalizePhoto(p)).filter(Boolean);
+  return v;
+}
+function findingFromVuln(v, catName){
+  const f = TT.newFinding({ track: TOOL_TRACK, site: v.fieldSite || document.getElementById('facName').value, category: catName || '' });
+  if(v.sourceFindingId) f.id = v.sourceFindingId;
+  if(v.capturedAt) f.createdAt = v.capturedAt;
+  f.priority = v.priority || 'Unrated';
+  ['vulnerability','risk','mitigation','followUp'].forEach(k=>{
+    f.fields[k] = { text: v[k] || '', audio: (v.audio && v.audio[k]) || [] };
+  });
+  f.photos = TT.clone(v.photos);
+  return f;
+}
+function isBlankVuln(v){
+  return !v.vulnerability && !v.risk && !v.mitigation && !v.followUp && !v.photos.length && v.priority==='Unrated'
+    && !(v.audio && Object.values(v.audio).some(a=>a.length));
+}
+function findCategoryByName(name){
+  const key = (name||'').trim().toLowerCase();
+  if(!key) return null;
+  return state.categories.find(c=>c.name.trim().toLowerCase()===key) || null;
+}
+function placeVulnInCategory(v, cat){
+  cat.vulnerabilities = cat.vulnerabilities.filter(x=>!isBlankVuln(x));
+  cat.vulnerabilities.push(v);
+  cat.status = 'assessed';
+}
+function locateBySource(findingId){
+  for(const c of state.categories){
+    const i = c.vulnerabilities.findIndex(v=>v.sourceFindingId===findingId);
+    if(i>=0) return { list:c.vulnerabilities, i, cat:c };
+  }
+  const i = (state.unsorted||[]).findIndex(v=>v.sourceFindingId===findingId);
+  return i>=0 ? { list:state.unsorted, i, cat:null } : null;
+}
+function importFindings(findings){
+  if(!findings.length) return;
+  const dupes = findings.filter(f=>locateBySource(f.id));
+  let replaceDupes = true;
+  if(dupes.length){
+    const what = findings.length===1 ? 'This finding is' : (dupes.length===1 ? '1 of these findings is' : dupes.length+' of these findings are');
+    replaceDupes = confirm(`${what} already in this report.\n\nOK — replace with the imported version\nCancel — skip ${dupes.length===1?'it':'them'}`);
+  }
+  let added = 0, updated = 0, toTray = 0, skipped = 0;
+  findings.forEach(f=>{
+    const v = vulnFromFinding(f);
+    const loc = locateBySource(f.id);
+    if(loc){
+      if(!replaceDupes){ skipped++; return; }
+      v.id = loc.list[loc.i].id;
+      loc.list[loc.i] = v;
+      updated++;
+      return;
+    }
+    const cat = findCategoryByName(f.category);
+    if(cat){ placeVulnInCategory(v, cat); added++; }
+    else { state.unsorted.push(v); toTray++; }
+  });
+  renderCategories();
+  renderUnsortedTray();
+  renderPrioritySummary();
+  markDirty();
+  const parts = [];
+  if(added) parts.push(`${added} added to categories`);
+  if(toTray) parts.push(`${toTray} in the Unsorted tray`);
+  if(updated) parts.push(`${updated} updated`);
+  if(skipped) parts.push(`${skipped} skipped`);
+  TT.toast('Imported: ' + (parts.join(' · ') || 'nothing new'), 5000);
+}
+async function importFindingFiles(e){
+  const { findings, errors } = await TT.readFindingFiles(e.target.files);
+  e.target.value = '';
+  if(errors.length) alert('Some files were skipped:\n\n' + errors.join('\n'));
+  importFindings(findings);
+}
+async function openDeviceLibrary(){
+  const wrap = document.getElementById('deviceLibrary');
+  if(wrap.innerHTML){ wrap.innerHTML = ''; return; }
+  let all = [];
+  try{ all = (await TT.dbGetAll('findings')).map(TT.normalizeFinding).filter(Boolean); }
+  catch(e){ wrap.innerHTML = '<p class="empty-note" style="margin-top:10px">This browser isn’t allowing on-device storage, so there’s no capture library here. Import finding files instead.</p>'; return; }
+  if(!all.length){ wrap.innerHTML = '<p class="empty-note" style="margin-top:10px">No findings captured on this device yet. Captures made on another phone arrive as files — use Import finding files.</p>'; return; }
+  all.sort((a,b)=>(a.site||'').localeCompare(b.site||'') || (a.createdAt||'').localeCompare(b.createdAt||''));
+  const facKey = (document.getElementById('facName').value||'').trim().toLowerCase();
+  let html = '<div class="lib-list">', lastSite = null;
+  all.forEach(f=>{
+    if((f.site||'') !== lastSite){ lastSite = f.site||''; html += `<div class="lib-site">${esc(lastSite || 'No site name')}</div>`; }
+    const inReport = !!locateBySource(f.id);
+    const preselect = !inReport && (!facKey || (f.site||'').trim().toLowerCase() === facKey);
+    html += `<label class="lib-row"><input type="checkbox" value="${f.id}" ${preselect?'checked':''}>
+      ${f.photos.length ? `<img data-libthumb="${f.id}" alt="">` : '<img alt="">'}
+      <span class="lib-txt"><div class="lib-snip">${esc(f.fields.vulnerability.text.trim() || 'No vulnerability text')}</div>
+      <div class="lib-meta">${esc(f.category || 'Unsorted')} · ${f.photos.length} photo${f.photos.length===1?'':'s'} · ${esc(TT.fmtTime(f.createdAt))}${inReport ? ' · <b>already in this report</b>' : ''}</div></span></label>`;
+  });
+  html += `<div class="lib-actions"><button class="btn btn-primary btn-small" onclick="importFromLibrary()">Import selected</button>
+    <button class="btn btn-outline btn-small" onclick="document.getElementById('deviceLibrary').innerHTML=''">Close</button></div></div>`;
+  wrap.innerHTML = html;
+  wrap._findings = all;
+  all.forEach(async f=>{
+    if(!f.photos.length) return;
+    const img = wrap.querySelector(`[data-libthumb="${f.id}"]`);
+    try{ if(img) img.src = await TT.renderThumb(f.photos[0], 120); }catch(e){}
+  });
+}
+function importFromLibrary(){
+  const wrap = document.getElementById('deviceLibrary');
+  const ids = Array.from(wrap.querySelectorAll('input[type=checkbox]:checked')).map(c=>c.value);
+  const chosen = (wrap._findings||[]).filter(f=>ids.includes(f.id));
+  wrap.innerHTML = '';
+  importFindings(chosen);
+}
+function renderUnsortedTray(){
+  const el = document.getElementById('unsortedTray');
+  if(!el) return;
+  const list = state.unsorted || [];
+  if(!list.length){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="tray">
+    <h3>Unsorted (${list.length})</h3>
+    <p>Captured without a category, or tagged with one this report doesn’t have. Assign each one — unsorted items don’t appear in the report.</p>
+    ${list.map(v=>`<div class="tray-row">
+      ${v.photos.length ? `<img data-traythumb="${v.id}" alt="">` : '<img alt="">'}
+      <div class="tray-txt"><div class="tray-snip">${esc(v.vulnerability.trim() || 'No vulnerability text')}</div>
+        <div class="tray-meta">${v.fieldCategory ? 'Tagged in the field as “'+esc(v.fieldCategory)+'” · ' : ''}${v.photos.length} photo${v.photos.length===1?'':'s'}${v.capturedAt ? ' · '+esc(TT.fmtTime(v.capturedAt)) : ''}</div></div>
+      <select onchange="assignUnsorted('${v.id}', this.value)">
+        <option value="">Assign to category…</option>
+        ${state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+        <option value="__new__">+ New category${v.fieldCategory ? ' “'+esc(v.fieldCategory)+'”' : '…'}</option>
+      </select>
+      <button class="cat-remove" onclick="removeUnsorted('${v.id}')">Remove</button>
+    </div>`).join('')}
+  </div>`;
+  list.forEach(async v=>{
+    if(!v.photos.length) return;
+    const img = el.querySelector(`[data-traythumb="${v.id}"]`);
+    try{ if(img) img.src = await TT.renderThumb(v.photos[0], 120); }catch(e){}
+  });
+}
+function assignUnsorted(vulnId, catId){
+  if(!catId) return;
+  const i = state.unsorted.findIndex(v=>v.id===vulnId);
+  if(i<0) return;
+  const v = state.unsorted[i];
+  let cat;
+  if(catId === '__new__'){
+    const name = (v.fieldCategory || prompt('Name for the new category:') || '').trim();
+    if(!name){ renderUnsortedTray(); return; }
+    cat = findCategoryByName(name);
+    if(!cat){ cat = { id: crypto.randomUUID(), name, status:'assessed', noReportReason:'', noReportOther:'', vulnerabilities:[] }; state.categories.push(cat); }
+  } else {
+    cat = state.categories.find(c=>c.id===catId);
+  }
+  if(!cat) return;
+  state.unsorted.splice(i,1);
+  placeVulnInCategory(v, cat);
+  renderCategories();
+  renderUnsortedTray();
+  renderPrioritySummary();
+  markDirty();
+  TT.toast('Moved to ' + cat.name);
+}
+function removeUnsorted(vulnId){
+  if(!confirm('Remove this finding from the report? (The original file and the capture library are not affected.)')) return;
+  state.unsorted = state.unsorted.filter(v=>v.id!==vulnId);
+  renderUnsortedTray();
+  markDirty();
+}
+async function exportVulnAsFinding(vulnId){
+  const { v, cat } = findVuln(vulnId);
+  if(!v) return;
+  const result = await TT.shareFindings([ findingFromVuln(v, cat ? cat.name : '') ]);
+  if(result !== 'cancelled') TT.toast('Finding file ready');
 }
 
 /* ---------------- PRIORITY SUMMARY ---------------- */
@@ -1188,7 +1508,40 @@ function photoGridHTML(photos){
   return `<div class="report-photo-grid">${photos.map(p=>`<figure><div class="photo-resize-wrap"><img src="${p.dataUrl}"><div class="resize-handle" data-resize-handle></div></div><figcaption>${esc(p.caption)||''}</figcaption></figure>`).join('')}</div>`;
 }
 
-function generateReport(){
+async function prerenderFindingPhotos(cats){
+  const out = {};
+  for(const c of cats){
+    for(const v of c.vulnerabilities){
+      for(const p of v.photos){
+        try{ out[p.id] = await TT.renderPhotoForPrint(p); }catch(e){ out[p.id] = p.dataUrl; }
+      }
+    }
+  }
+  return out;
+}
+function findingPhotoGridHTML(photos, rendered){
+  if(!photos.length) return '';
+  return `<div class="report-photo-grid">${photos.map(p=>`<figure class="fit-fig" style="width:${(p.printWidthIn||4).toFixed(2)}in">
+    <div class="photo-resize-wrap fit" data-photo-id="${p.id}"><img src="${rendered[p.id] || p.dataUrl}"><div class="resize-handle" data-resize-handle></div></div>
+    ${p.caption && p.caption.enabled && (p.caption.text||'').trim() ? `<figcaption>${esc(p.caption.text)}</figcaption>` : ''}</figure>`).join('')}</div>`;
+}
+let generatingReport = false;
+async function generateReport(){
+  if(generatingReport) return;
+  const unsortedCount = (state.unsorted||[]).length;
+  const pendingAudio = state.categories.filter(c=>c.status!=='no-report').reduce((n,c)=>n + c.vulnerabilities.reduce((m,v)=>m + (v.audio ? Object.values(v.audio).reduce((k,a)=>k + a.filter(x=>!x.transcribed).length, 0) : 0), 0), 0);
+  const warnings = [];
+  if(unsortedCount) warnings.push(`• ${unsortedCount} unsorted finding${unsortedCount===1?'':'s'} in Step 05 will NOT appear in the report.`);
+  if(pendingAudio) warnings.push(`• ${pendingAudio} audio memo${pendingAudio===1?' is':'s are'} still marked "to transcribe".`);
+  if(warnings.length && !confirm(warnings.join('\n') + '\n\nGenerate the report anyway?')) return;
+  generatingReport = true;
+  TT.toast('Rendering photos…', 2500);
+  let renderedPhotos = {};
+  try{ renderedPhotos = await prerenderFindingPhotos(state.categories.filter(c=>c.status!=='no-report')); }
+  finally{ generatingReport = false; }
+  buildReportHTML(renderedPhotos);
+}
+function buildReportHTML(renderedPhotos){
   const teamName = document.getElementById('teamName').value || 'Assessment Team Name';
   const teamWebsite = document.getElementById('teamWebsite').value;
   const teamLicense = document.getElementById('teamLicense').value;
@@ -1330,6 +1683,7 @@ function generateReport(){
         return;
       }
       const items = c.vulnerabilities.filter(v => v.vulnerability || v.risk || v.mitigation || v.photos.length);
+      // Note: follow-up notes are internal and are never written into the report.
       if(items.length===0){
         html += `<p class="empty-note">No vulnerabilities identified in this category.</p>`;
         return;
@@ -1345,7 +1699,7 @@ function generateReport(){
           ${paragraphs(v.risk)}
           <div class="label">Mitigation</div>
           ${paragraphs(v.mitigation)}
-          ${photoGridHTML(v.photos)}
+          ${findingPhotoGridHTML(v.photos, renderedPhotos)}
         </div>`;
       });
     });
@@ -1440,14 +1794,35 @@ function bindPhotoResizeHandles(){
       handle.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
+    const fig = wrap.parentElement;
+    const isFinding = wrap.classList.contains('fit');
+    let figStartW = 0;
+    if(isFinding){
+      handle.addEventListener('pointerdown', ()=>{ figStartW = fig.offsetWidth; });
+    }
     handle.addEventListener('pointermove', (e)=>{
       if(!active) return;
+      if(isFinding){
+        // Finding photos keep their aspect ratio; width is in print inches (96 CSS px = 1in)
+        const inches = Math.min(6.5, Math.max(1.5, (figStartW + (e.clientX - startX)) / 96));
+        fig.style.width = inches.toFixed(2) + 'in';
+        return;
+      }
       const newW = Math.min(650, Math.max(150, startW + (e.clientX - startX)));
       const newH = Math.min(520, Math.max(100, startH + (e.clientY - startY)));
       wrap.style.width = newW + 'px';
       wrap.style.height = newH + 'px';
     });
-    const end = (e)=>{ active = false; };
+    const end = (e)=>{
+      if(active && isFinding){
+        // Remember the new size on the photo itself so it sticks in saves and the next report
+        const inches = Math.round((fig.offsetWidth / 96) * 4) / 4;
+        const id = wrap.dataset.photoId;
+        state.categories.forEach(c=>c.vulnerabilities.forEach(v=>v.photos.forEach(p=>{ if(p.id===id) p.printWidthIn = inches; })));
+        markDirty();
+      }
+      active = false;
+    };
     handle.addEventListener('pointerup', end);
     handle.addEventListener('pointercancel', end);
   });
@@ -1519,16 +1894,38 @@ function applyFormValues(values){
     else el.value = values[id];
   });
 }
-function saveProgress(){
-  const payload = {
+function buildProgressPayload(){
+  return {
     savedAt: new Date().toISOString(),
+    tool: TOOL_TRACK,
     formValues: collectFormValues(),
     logo: state.logo,
     facilityPhotos: state.facilityPhotos,
     blueprints: state.blueprints,
     categories: state.categories,
+    unsorted: state.unsorted || [],
     teamMembers: state.teamMembers
   };
+}
+function applyProgressPayload(payload){
+  applyFormValues(payload.formValues || {});
+  state.logo = payload.logo || null;
+  state.facilityPhotos = payload.facilityPhotos || [];
+  state.blueprints = payload.blueprints || [];
+  state.categories = migrateCategories(payload.categories || []);
+  state.unsorted = migrateVulns(payload.unsorted || []);
+  state.teamMembers = (payload.teamMembers && payload.teamMembers.length) ? payload.teamMembers : [ makeTeamMember() ];
+  renderLogoPreview();
+  renderPhotoGrid('facilityPhotos');
+  renderPhotoGrid('blueprints');
+  renderCategories();
+  renderUnsortedTray();
+  updateTeamConfig();
+  renderPrioritySummary();
+  updateFilenamePreview();
+}
+function saveProgress(){
+  const payload = buildProgressPayload();
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1558,7 +1955,21 @@ function migrateCategories(cats){
       cat.noReportOther = '';
     }
     delete cat.included;
+    cat.vulnerabilities = migrateVulns(cat.vulnerabilities);
     return cat;
+  });
+}
+/* Bring every vulnerability item up to the current shape: internal
+   follow-up notes, audio memos, and layered photos (crop, print size,
+   caption toggle, annotations). Older files load unchanged otherwise. */
+function migrateVulns(list){
+  return (list||[]).map(v=>{
+    const base = makeVuln();
+    const out = Object.assign(base, v);
+    out.followUp = out.followUp || '';
+    out.audio = Object.assign({ vulnerability:[], risk:[], mitigation:[], followUp:[] }, v.audio || {});
+    out.photos = (v.photos||[]).map(p=>TT.normalizePhoto(p)).filter(Boolean);
+    return out;
   });
 }
 function loadProgress(e){
@@ -1568,19 +1979,9 @@ function loadProgress(e){
   reader.onload = () => {
     try{
       const payload = JSON.parse(reader.result);
-      applyFormValues(payload.formValues || {});
-      state.logo = payload.logo || null;
-      state.facilityPhotos = payload.facilityPhotos || [];
-      state.blueprints = payload.blueprints || [];
-      state.categories = migrateCategories(payload.categories || []);
-      state.teamMembers = (payload.teamMembers && payload.teamMembers.length) ? payload.teamMembers : [ makeTeamMember() ];
-      renderLogoPreview();
-      renderPhotoGrid('facilityPhotos');
-      renderPhotoGrid('blueprints');
-      renderCategories();
-      updateTeamConfig();
-      renderPrioritySummary();
-      updateFilenamePreview();
+      if(payload && payload.type === TT.SCHEMA){ alert('That’s a single finding file — import it in Step 05 (Assessment Categories) instead.'); return; }
+      applyProgressPayload(payload);
+      markDirty();
       showPanel('team');
       alert('Progress loaded from ' + file.name);
     }catch(err){
@@ -1755,6 +2156,56 @@ function unlockSignature(){
   state.signature = null;
   renderSignatureBlock();
 }
+
+
+/* ---------------- AUTOSAVE (this device) ----------------
+   The whole assessment — text, photos, findings — is kept in the
+   browser's on-device database and restored automatically, so a phone
+   or tablet can close the app mid-assessment without losing anything.
+   Progress files (Step 10) remain the way to move work between devices. */
+const DRAFT_KEY = 'draft-' + TOOL_TRACK;
+let autosaveReady = false, autosaveDirty = false, autosaveOff = false;
+function markDirty(){ if(autosaveReady) autosaveDirty = true; }
+['input','change','click','pointerup'].forEach(ev=>document.addEventListener(ev, ()=>{ if(autosaveReady) autosaveDirty = true; }, true));
+function setAutosaveStatus(msg){ document.querySelectorAll('[data-autosave-status]').forEach(el=>el.textContent = msg); }
+async function autosaveNow(){
+  if(autosaveOff || !autosaveReady) return;
+  autosaveDirty = false;
+  try{
+    const payload = buildProgressPayload();
+    payload.key = DRAFT_KEY;
+    await TT.dbPut('drafts', payload);
+    setAutosaveStatus('Saved on this device · ' + new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }));
+  }catch(e){
+    setAutosaveStatus('Not saving on this device (browser storage blocked) — use Save Progress.');
+  }
+}
+setInterval(()=>{ if(autosaveDirty) autosaveNow(); }, 4000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden' && autosaveDirty) autosaveNow(); });
+window.addEventListener('pagehide', ()=>{ if(autosaveDirty) autosaveNow(); });
+async function restoreDraft(){
+  try{
+    const d = await TT.dbGet('drafts', DRAFT_KEY);
+    if(d && d.savedAt){
+      applyProgressPayload(d);
+      setAutosaveStatus('Saved on this device · ' + new Date(d.savedAt).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }));
+      TT.toast('Picked up where you left off', 2800);
+    } else {
+      setAutosaveStatus('Saves automatically on this device');
+    }
+  }catch(e){
+    setAutosaveStatus('This browser is blocking on-device storage — use Save Progress.');
+  }
+  autosaveReady = true;
+  TT.requestPersistentStorage();
+}
+async function startNewAssessment(){
+  if(!confirm('Clear the assessment saved on this device and start a new one?\n\nSave a progress file first if you may need this one again.')) return;
+  autosaveOff = true;
+  try{ await TT.dbDelete('drafts', DRAFT_KEY); }catch(e){}
+  location.reload();
+}
+restoreDraft();
 
 /* ---------------- PWA: SERVICE WORKER ----------------
    Registers the offline cache. Wrapped in a feature check and try/catch

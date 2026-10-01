@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VA Field Capture</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f4858">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VA Capture">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --ink:#1c2430; --ink-soft:#4b5563; --paper:#faf8f4; --line:#e4ded2; --border:#d8d2c4;
+    --folder:#2f4858; --folder-dark:#233a47; --copper:#c17a4f; --accent:#8a5a3b;
+    --low:#5b7f5e; --medium:#b98a35; --high:#b95c38; --critical:#a13c3c;
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--sans);color:var(--ink);background:#e9e4d8;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  button{font-family:var(--sans);}
+  input,select,textarea{font-family:var(--sans);font-size:16px;}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--folder);color:#fff;display:flex;align-items:center;gap:12px;
+    padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));}
+  .bar h1{font-family:var(--serif);font-size:19px;font-weight:600;margin:0;flex:1;}
+  .bar .eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9fb4bf;}
+  .net{font-size:11px;font-weight:700;letter-spacing:.06em;padding:4px 9px;border-radius:12px;background:#5b7f5e;color:#fff;white-space:nowrap;}
+  .net.off{background:#b98a35;}
+  .bar .back{background:none;border:none;color:#fff;font-size:16px;font-weight:600;padding:6px 4px;cursor:pointer;}
+  .save-state{font-size:12px;color:#c7d2d8;white-space:nowrap;}
+
+  main{max-width:640px;margin:0 auto;padding:16px 16px calc(40px + env(safe-area-inset-bottom));}
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+  label.f{display:block;font-size:12.5px;font-weight:700;margin:0 0 6px;}
+  label.f .opt{font-weight:400;color:var(--ink-soft);font-size:11.5px;margin-left:4px;}
+  input[type=text],select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--ink);}
+  .seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:12px;}
+  .seg button{flex:1;border:none;background:#fff;padding:11px 8px;font-size:14px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+  .seg button.on{background:var(--folder);color:#fff;}
+  .seg.small{margin:0;}
+  .seg.small button{padding:7px 12px;font-size:12.5px;}
+
+  .big{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:none;border-radius:12px;background:var(--copper);color:#fff;
+    font-size:19px;font-weight:700;padding:20px;cursor:pointer;box-shadow:0 4px 14px rgba(193,122,79,.35);}
+  .big:active{transform:translateY(1px);}
+  .linkbtn{display:block;margin:10px auto 22px;background:none;border:none;color:var(--folder);font-size:14px;font-weight:600;text-decoration:underline;cursor:pointer;}
+
+  .list-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px;}
+  .list-head h2{font-family:var(--serif);font-size:20px;margin:0;}
+  .empty{text-align:center;color:var(--ink-soft);font-size:14px;padding:24px 10px;border:1.5px dashed var(--border);border-radius:10px;background:#fbfaf6;}
+  .site-group{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:16px 2px 8px;}
+  .fitem{display:flex;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;cursor:pointer;align-items:stretch;}
+  .fitem:active{background:#f6f3ec;}
+  .fthumb{width:76px;height:76px;border-radius:6px;object-fit:cover;background:#e4ded2;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:24px;}
+  .fbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+  .fsnip{font-size:14px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .fsnip.none{color:var(--ink-soft);font-style:italic;}
+  .fmeta{font-size:11.5px;color:var(--ink-soft);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:700;color:#fff;letter-spacing:.02em;}
+  .pill.cat{background:var(--folder);}
+  .pill.unsorted{background:#b98a35;}
+  .pill.Low{background:var(--low);} .pill.Medium{background:var(--medium);} .pill.High{background:var(--high);} .pill.Critical{background:var(--critical);}
+  .pill.sent{background:#5b7f5e;} .pill.changed{background:#8a5a3b;} .pill.audio{background:#a13c3c;}
+
+  .send-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);background:#fff;color:var(--ink);
+    border-radius:8px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;min-height:46px;}
+  .btn.primary{background:var(--folder);border-color:var(--folder);color:#fff;}
+  .btn.danger{color:var(--critical);}
+  .btn:disabled{opacity:.45;}
+  .note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:10px 2px 0;}
+  .builder-link{display:block;text-align:center;margin:18px 0 6px;color:var(--folder);font-weight:700;font-size:14px;}
+
+  /* finding screen */
+  .strip{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;}
+  .pcard{flex:0 0 78%;max-width:340px;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;scroll-snap-align:start;}
+  .pimg{position:relative;background:#14191f;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .pimg img{max-width:100%;max-height:100%;display:block;}
+  .badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;letter-spacing:.1em;background:var(--copper);color:#fff;padding:3px 7px;border-radius:10px;}
+  .badge.cap{left:auto;right:8px;background:rgba(28,36,48,.85);}
+  .pactions{display:flex;gap:6px;padding:8px;flex-wrap:wrap;}
+  .pactions button{flex:1 1 auto;border:1px solid var(--border);background:#fff;border-radius:6px;padding:9px 6px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);min-height:40px;}
+  .pactions button.main{flex-basis:100%;background:var(--folder);border-color:var(--folder);color:#fff;}
+  .pactions button.del{color:var(--critical);flex:0 0 auto;}
+  .add-row{display:flex;gap:10px;margin-top:4px;}
+  .no-photos{flex:1;text-align:center;color:var(--ink-soft);font-size:14px;padding:26px 10px;border:1.5px dashed var(--border);border-radius:10px;background:#fbfaf6;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .chips button{border:1px solid var(--border);background:#fff;border-radius:16px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink-soft);}
+  .chips button.on{color:#fff;border-color:transparent;background:#6b7280;}
+  .chips button.on.Low{background:var(--low);} .chips button.on.Medium{background:var(--medium);}
+  .chips button.on.High{background:var(--high);} .chips button.on.Critical{background:var(--critical);}
+  .grid2{display:grid;grid-template-columns:1fr;gap:12px;}
+  .section-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800;margin:20px 2px 8px;}
+  .processing{position:fixed;inset:0;background:rgba(20,25,31,.55);z-index:500;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;}
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+
+<!-- ================= HOME ================= -->
+<div id="homeView">
+  <header class="bar">
+    <div style="flex:1">
+      <div class="eyebrow">Vulnerability Assessment</div>
+      <h1>Field Capture</h1>
+    </div>
+    <span class="net" id="netBadge">Online</span>
+  </header>
+  <main>
+    <section class="card">
+      <label class="f" for="siteInput">Site</label>
+      <input type="text" id="siteInput" placeholder="Facility or property name" autocomplete="off">
+      <div class="seg" id="trackSeg" role="group" aria-label="Assessment type">
+        <button data-track="commercial">Facility &amp; Commercial</button>
+        <button data-track="residential">Residential</button>
+      </div>
+    </section>
+
+    <button class="big" id="newFindingBtn">📷&nbsp; New finding</button>
+    <button class="linkbtn" id="newBlankBtn">or start one without a photo</button>
+
+    <div class="list-head">
+      <h2>Findings</h2>
+      <div class="seg small" id="scopeSeg">
+        <button data-scope="site">This site</button>
+        <button data-scope="all">All sites</button>
+      </div>
+    </div>
+    <div id="findingList"></div>
+
+    <div class="section-title">Send to your desk</div>
+    <section class="card">
+      <div class="send-row">
+        <button class="btn primary" id="sendUnsentBtn">Send unsent</button>
+        <button class="btn" id="sendAllBtn">Send all for this site</button>
+      </div>
+      <p class="note">Opens your share sheet — pick <b>OneDrive</b> (or Save to Files → OneDrive), <b>Mail</b>, or <b>Messages</b>. Each finding travels as one self-contained <code>.json</code> file, photos included.</p>
+    </section>
+
+    <a class="builder-link" id="builderLink" href="../app/">Open the report builder →</a>
+    <p class="note" style="text-align:center">Findings save on this device as you work — no signal needed. Sending is how they leave the phone.</p>
+  </main>
+</div>
+
+<!-- ================= FINDING ================= -->
+<div id="findingView" hidden>
+  <header class="bar">
+    <button class="back" id="backBtn">‹ Findings</button>
+    <h1 style="text-align:center">Finding</h1>
+    <span class="save-state" id="saveState"></span>
+  </header>
+  <main>
+    <div class="section-title" style="margin-top:4px">Photos</div>
+    <div class="strip" id="photoStrip"></div>
+    <div class="add-row">
+      <button class="btn" id="addCamBtn">📷 Add photo</button>
+      <button class="btn" id="addLibBtn">🖼 From library</button>
+    </div>
+
+    <div class="section-title">Sort <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-soft)">— optional, can be done at the desk</span></div>
+    <section class="card grid2">
+      <div>
+        <label class="f" for="catSelect">Category</label>
+        <select id="catSelect"></select>
+      </div>
+      <div>
+        <label class="f">Priority</label>
+        <div class="chips" id="prioChips"></div>
+      </div>
+      <div>
+        <label class="f" for="findingSite">Site</label>
+        <input type="text" id="findingSite" autocomplete="off">
+      </div>
+    </section>
+
+    <div class="section-title">Notes</div>
+    <section class="card" id="fieldsCard"></section>
+    <p class="note">Tip: your keyboard’s own mic key also dictates — on most current phones it works with no signal at all.</p>
+
+    <div class="section-title">Send</div>
+    <section class="card">
+      <div class="send-row">
+        <button class="btn primary" id="sendOneBtn">Send / save to OneDrive…</button>
+      </div>
+      <div class="send-row" style="margin-top:10px">
+        <button class="btn" id="dlOneBtn">Download file</button>
+        <button class="btn danger" id="delOneBtn">Delete finding</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+<input type="file" id="libInput" accept="image/*" multiple hidden>
+<div class="processing" id="processing" hidden>Processing photo…</div>
+
+<script src="../shared/finding-kit.js"></script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+let settings = { key:'capture', site:'', track:'commercial', scope:'site' };
+let findings = [];
+let current = null;
+let pendingPhotoMode = null;   // 'new' | 'add'
+
+/* ---------------- boot ---------------- */
+async function boot(){
+  TT.injectStyles();
+  try{
+    const s = await TT.dbGet('settings','capture');
+    if(s) settings = Object.assign(settings, s);
+    findings = (await TT.dbGetAll('findings')).map(TT.normalizeFinding).filter(Boolean);
+  }catch(e){
+    TT.toast('This browser is blocking on-device storage — findings won’t persist. Send each one before closing.', 7000);
+  }
+  TT.requestPersistentStorage();
+  $('siteInput').value = settings.site || '';
+  renderTrack(); renderScope(); renderList();
+  updateNet();
+}
+function saveSettings(){ TT.dbPut('settings', settings).catch(()=>{}); }
+
+/* ---------------- network badge ---------------- */
+function updateNet(){
+  const on = navigator.onLine;
+  $('netBadge').textContent = on ? 'Online' : 'Offline';
+  $('netBadge').classList.toggle('off', !on);
+}
+window.addEventListener('online', updateNet);
+window.addEventListener('offline', updateNet);
+
+/* ---------------- home ---------------- */
+$('siteInput').addEventListener('input', TT.debounce(()=>{ settings.site = $('siteInput').value.trim(); saveSettings(); renderList(); }, 400));
+$('trackSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  settings.track = b.dataset.track; saveSettings(); renderTrack();
+});
+$('scopeSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  settings.scope = b.dataset.scope; saveSettings(); renderScope(); renderList();
+});
+function renderTrack(){
+  document.querySelectorAll('#trackSeg button').forEach(b=>b.classList.toggle('on', b.dataset.track === settings.track));
+  $('builderLink').href = TT.TRACKS[settings.track].builder;
+}
+function renderScope(){
+  document.querySelectorAll('#scopeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.scope === settings.scope));
+}
+function siteKey(s){ return (s||'').trim().toLowerCase(); }
+function visibleFindings(){
+  const list = findings.slice().sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  if(settings.scope === 'site') return list.filter(f=>siteKey(f.site) === siteKey(settings.site));
+  return list;
+}
+function isUnsent(f){ return !f.exportedAt || (f.updatedAt > f.exportedAt); }
+
+async function renderList(){
+  const list = visibleFindings();
+  const el = $('findingList');
+  if(!list.length){
+    el.innerHTML = `<div class="empty">${findings.length && settings.scope==='site' ? 'No findings for this site yet. Switch to “All sites” to see the others.' : 'No findings yet. Tap <b>New finding</b> to photograph your first one.'}</div>`;
+  } else {
+    let html = '', lastSite = null;
+    list.forEach(f=>{
+      if(settings.scope === 'all' && siteKey(f.site) !== lastSite){
+        lastSite = siteKey(f.site);
+        html += `<div class="site-group">${TT.esc(f.site || 'No site name')}</div>`;
+      }
+      const snip = f.fields.vulnerability.text.trim();
+      const pend = TT.pendingAudioCount(f);
+      const sent = f.exportedAt ? (f.updatedAt > f.exportedAt ? '<span class="pill changed">Changed since sent</span>' : '<span class="pill sent">Sent ✓</span>') : '';
+      html += `<div class="fitem" data-id="${f.id}">
+        ${f.photos.length ? `<img class="fthumb" data-thumb="${f.id}" alt="">` : `<div class="fthumb">📝</div>`}
+        <div class="fbody">
+          <div class="fmeta">${f.category ? `<span class="pill cat">${TT.esc(f.category)}</span>` : '<span class="pill unsorted">Unsorted</span>'}
+            ${f.priority && f.priority!=='Unrated' ? `<span class="pill ${f.priority}">${f.priority}</span>` : ''}</div>
+          <div class="fsnip ${snip?'':'none'}">${snip ? TT.esc(snip) : 'No vulnerability text yet'}</div>
+          <div class="fmeta">${f.photos.length} photo${f.photos.length===1?'':'s'} · ${TT.esc(TT.fmtTime(f.createdAt))}
+            ${pend ? `<span class="pill audio">${pend} memo${pend===1?'':'s'} to transcribe</span>` : ''}
+            ${f.fields.followUp.text.trim() ? '<span title="Has follow-up notes">✎ follow-up</span>' : ''} ${sent}</div>
+        </div></div>`;
+    });
+    el.innerHTML = html;
+    list.forEach(async f=>{
+      if(!f.photos.length) return;
+      const img = el.querySelector(`[data-thumb="${f.id}"]`);
+      try{ img.src = await TT.renderThumb(f.photos[0], 200); }catch(e){}
+    });
+  }
+  const siteList = findings.filter(f=>siteKey(f.site) === siteKey(settings.site));
+  const unsent = visibleFindings().filter(isUnsent);
+  $('sendUnsentBtn').textContent = `Send unsent (${unsent.length})`;
+  $('sendUnsentBtn').disabled = !unsent.length;
+  $('sendAllBtn').textContent = `Send all for this site (${siteList.length})`;
+  $('sendAllBtn').disabled = !siteList.length;
+}
+$('findingList').addEventListener('click', e=>{
+  const item = e.target.closest('.fitem'); if(!item) return;
+  const f = findings.find(x=>x.id === item.dataset.id);
+  if(f) openFinding(f);
+});
+
+/* ---------------- new finding ---------------- */
+$('newFindingBtn').addEventListener('click', ()=>{ pendingPhotoMode = 'new'; $('camInput').value = ''; $('camInput').click(); });
+$('newBlankBtn').addEventListener('click', async ()=>{
+  const f = createFinding(); await persist(f, true); openFinding(f);
+});
+function createFinding(){
+  const f = TT.newFinding({ track: settings.track, site: settings.site });
+  findings.push(f);
+  return f;
+}
+async function handlePhotoFiles(files){
+  files = Array.from(files || []).filter(f=>f.type.startsWith('image/') || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+  if(!files.length) return;
+  $('processing').hidden = false;
+  try{
+    const photos = [];
+    for(const file of files){
+      try{ photos.push(await TT.fileToPhoto(file)); }
+      catch(e){ TT.toast('One photo couldn’t be read in this browser (format not supported).'); }
+    }
+    if(!photos.length) return;
+    if(pendingPhotoMode === 'new' || !current){
+      const f = createFinding();
+      f.photos.push(...photos);
+      await persist(f, true);
+      openFinding(f);
+    } else {
+      current.photos.push(...photos);
+      await persist(current, true);
+      renderPhotos();
+    }
+  } finally {
+    $('processing').hidden = true;
+    pendingPhotoMode = null;
+  }
+}
+$('camInput').addEventListener('change', e=>handlePhotoFiles(e.target.files));
+$('libInput').addEventListener('change', e=>handlePhotoFiles(e.target.files));
+
+/* ---------------- persistence ---------------- */
+async function persist(f, touch){
+  if(touch) f.updatedAt = new Date().toISOString();
+  try{
+    await TT.dbPut('findings', f);
+    if(f === current) $('saveState').textContent = 'Saved ✓';
+  }catch(e){
+    if(f === current) $('saveState').textContent = 'Not saved!';
+    TT.toast('Couldn’t save on this device — send this finding before closing.', 6000);
+  }
+}
+const persistCurrentSoon = TT.debounce(()=>{ if(current) persist(current, false); }, 600);
+function changed(){ if(current){ current.updatedAt = new Date().toISOString(); $('saveState').textContent = 'Saving…'; persistCurrentSoon(); } }
+
+/* ---------------- finding screen ---------------- */
+function openFinding(f){
+  current = f;
+  $('homeView').hidden = true; $('findingView').hidden = false;
+  $('saveState').textContent = '';
+  window.scrollTo(0,0);
+  if(history.state == null || history.state.finding !== f.id) history.pushState({ finding:f.id }, '');
+  renderPhotos(); renderSort(); renderFields();
+}
+function closeFinding(){
+  TT.stopVoice();
+  if(current){ persist(current, false); }
+  current = null;
+  $('findingView').hidden = true; $('homeView').hidden = false;
+  renderList();
+}
+$('backBtn').addEventListener('click', ()=>{ if(history.state && history.state.finding) history.back(); else closeFinding(); });
+window.addEventListener('popstate', ()=>{ if(current && !document.querySelector('.tt-ed')) closeFinding(); });
+
+async function renderPhotos(){
+  const f = current;
+  const strip = $('photoStrip');
+  if(!f.photos.length){
+    strip.innerHTML = `<div class="no-photos">No photos yet — add one below.</div>`;
+    return;
+  }
+  strip.innerHTML = f.photos.map((p,i)=>`
+    <div class="pcard" data-i="${i}">
+      <div class="pimg" data-act="edit"><img data-pthumb="${i}" alt="Photo ${i+1}">
+        ${i===0 ? '<span class="badge">LEAD</span>' : ''}
+        ${p.caption.enabled && p.caption.text.trim() ? '<span class="badge cap">CAPTION</span>' : ''}</div>
+      <div class="pactions">
+        <button class="main" data-act="edit">Crop &amp; mark up</button>
+        <button data-act="caption">${p.caption.enabled ? 'Size & caption' : 'Size · + caption'}</button>
+        <button data-act="left" ${i===0?'disabled':''} aria-label="Move left">◀</button>
+        ${i>0 ? '<button data-act="lead">★ Lead</button>' : ''}
+        <button data-act="right" ${i===f.photos.length-1?'disabled':''} aria-label="Move right">▶</button>
+        <button class="del" data-act="del" aria-label="Remove photo">🗑</button>
+      </div>
+    </div>`).join('');
+  f.photos.forEach(async (p,i)=>{
+    const img = strip.querySelector(`[data-pthumb="${i}"]`);
+    try{ img.src = await TT.renderThumb(p, 640); }catch(e){}
+  });
+}
+$('photoStrip').addEventListener('click', e=>{
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const card = b.closest('.pcard'); const i = +card.dataset.i;
+  const ph = current.photos;
+  const act = b.dataset.act;
+  if(act === 'edit' || act === 'caption'){
+    TT.openPhotoEditor(ph[i], {
+      startTool: act === 'caption' ? 'layout' : 'move',
+      sampleText: current.fields.vulnerability.text,
+      onSave(updated){ current.photos[i] = updated; changed(); renderPhotos(); }
+    });
+    return;
+  }
+  if(act === 'left' && i>0){ [ph[i-1], ph[i]] = [ph[i], ph[i-1]]; }
+  if(act === 'right' && i<ph.length-1){ [ph[i+1], ph[i]] = [ph[i], ph[i+1]]; }
+  if(act === 'lead' && i>0){ ph.unshift(ph.splice(i,1)[0]); }
+  if(act === 'del'){ if(!confirm('Remove this photo from the finding?')) return; ph.splice(i,1); }
+  changed(); renderPhotos();
+});
+$('addCamBtn').addEventListener('click', ()=>{ pendingPhotoMode = 'add'; $('camInput').value = ''; $('camInput').click(); });
+$('addLibBtn').addEventListener('click', ()=>{ pendingPhotoMode = 'add'; $('libInput').value = ''; $('libInput').click(); });
+
+function renderSort(){
+  const f = current;
+  const cats = TT.TRACKS[f.track] ? TT.TRACKS[f.track].categories.slice() : [];
+  if(f.category && !cats.includes(f.category)) cats.unshift(f.category);
+  $('catSelect').innerHTML = `<option value="">Unsorted — sort later</option>` + cats.map(c=>`<option ${c===f.category?'selected':''}>${TT.esc(c)}</option>`).join('');
+  $('prioChips').innerHTML = TT.PRIORITIES.map(p=>`<button data-p="${p}" class="${p} ${f.priority===p?'on':''}">${p}</button>`).join('');
+  $('findingSite').value = f.site || '';
+}
+$('catSelect').addEventListener('change', ()=>{ current.category = $('catSelect').value; changed(); });
+$('prioChips').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  current.priority = b.dataset.p; changed(); renderSort();
+});
+$('findingSite').addEventListener('input', ()=>{ current.site = $('findingSite').value.trim(); changed(); });
+
+function renderFields(){
+  const card = $('fieldsCard');
+  card.innerHTML = '';
+  TT.FIELDS.forEach(d=>{
+    const el = document.createElement('div');
+    card.appendChild(el);
+    TT.mountVoiceField(el, {
+      label: d.label, hint: d.hint, internal: !!d.internal,
+      get: ()=>current.fields[d.key],
+      onChange: changed
+    });
+  });
+}
+
+/* ---------------- send / delete ---------------- */
+async function send(list, forceDownload){
+  if(!list.length) return;
+  TT.stopVoice();
+  const result = await TT.shareFindings(list, { forceDownload });
+  if(result === 'cancelled') return;
+  const now = new Date().toISOString();
+  for(const f of list){ f.exportedAt = now; if(f.updatedAt > now) f.updatedAt = now; await persist(f, false); }
+  TT.toast(result === 'shared' ? `Sent ${list.length} finding${list.length===1?'':'s'}` : `Downloaded ${list.length} file${list.length===1?'':'s'}`);
+  renderList();
+}
+$('sendOneBtn').addEventListener('click', async ()=>{ await persist(current, false); send([current]); });
+$('dlOneBtn').addEventListener('click', async ()=>{ await persist(current, false); send([current], true); });
+$('sendUnsentBtn').addEventListener('click', ()=>send(visibleFindings().filter(isUnsent)));
+$('sendAllBtn').addEventListener('click', ()=>send(findings.filter(f=>siteKey(f.site) === siteKey(settings.site))));
+$('delOneBtn').addEventListener('click', async ()=>{
+  const f = current;
+  const warn = f.exportedAt ? 'Delete this finding from the phone?' : 'This finding hasn’t been sent yet. Delete it anyway?';
+  if(!confirm(warn)) return;
+  findings = findings.filter(x=>x.id !== f.id);
+  try{ await TT.dbDelete('findings', f.id); }catch(e){}
+  current = null;
+  closeFinding();
+  if(history.state && history.state.finding) history.back();
+});
+
+/* save immediately if the app is backgrounded mid-edit */
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden' && current){ TT.stopVoice(); persist(current, false); } });
+
+boot();
+
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(err=>console.warn('SW registration failed', err)); });
+}
+})();
+</script>
+</body>
+</html>
