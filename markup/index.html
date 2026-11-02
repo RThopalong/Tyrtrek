@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Tyrtrek Photo Markup</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14181d">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Markup">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{
+  --bg:#14181d; --panel:#1d232a; --panel-2:#262d36; --line:#343d48; --text:#eef1f4; --muted:#9aa6b2;
+  --folder:#2f4858; --copper:#c17a4f; --copper-2:#d48d61; --paper:#faf8f4; --ink:#1c2430;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
+button{font-family:var(--sans);color:inherit;}
+input,textarea,select{font-family:var(--sans);font-size:16px;}
+.hidden{display:none !important;}
+
+/* ---------- HOME ---------- */
+#home{min-height:100%;padding:calc(20px + var(--safe-t)) 18px calc(28px + var(--safe-b));max-width:640px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:12px;margin:6px 0 26px;}
+.brand img{width:40px;height:40px;border-radius:9px;background:#fff;object-fit:contain;padding:3px;}
+.brand .eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+.brand h1{font-family:var(--serif);font-weight:600;font-size:23px;margin:2px 0 0;}
+.cta{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cta button{border:none;border-radius:14px;padding:22px 12px;font-size:16px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;}
+.cta .primary{background:var(--copper);color:#fff;box-shadow:0 6px 20px rgba(193,122,79,.3);}
+.cta .secondary{background:var(--panel-2);border:1px solid var(--line);}
+.cta svg{width:30px;height:30px;}
+.sec-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:30px 2px 12px;display:flex;justify-content:space-between;align-items:center;}
+.recent{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;}
+.rcard{position:relative;border-radius:10px;overflow:hidden;background:var(--panel);border:1px solid var(--line);cursor:pointer;}
+.rcard img{display:block;width:100%;aspect-ratio:1;object-fit:cover;}
+.rcard .rmeta{font-size:11px;padding:6px 8px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rcard .rdel{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:13px;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:1;cursor:pointer;}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:26px 10px;border:1.5px dashed var(--line);border-radius:12px;}
+.foot{margin-top:30px;font-size:12.5px;color:var(--muted);line-height:1.55;}
+.foot a{color:var(--copper-2);}
+.install{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.5;}
+.install b{color:var(--text);}
+
+/* ---------- EDITOR ---------- */
+#editor{position:fixed;inset:0;display:flex;flex-direction:column;background:#0b0d10;}
+.topbar{display:flex;align-items:center;gap:6px;padding:calc(8px + var(--safe-t)) 10px 8px;background:var(--bg);border-bottom:1px solid #222a33;}
+.tb-btn{background:none;border:none;font-size:15px;font-weight:600;padding:8px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.tb-btn:disabled{opacity:.35;}
+.tb-btn svg{width:22px;height:22px;}
+.tb-spacer{flex:1;}
+.tb-done{background:var(--copper);color:#fff;padding:9px 16px;border-radius:9px;font-weight:700;}
+#stage{flex:1;position:relative;overflow:hidden;touch-action:none;}
+#cv{position:absolute;left:0;top:0;touch-action:none;}
+.opts{background:var(--bg);border-top:1px solid #222a33;padding:9px 10px 4px;display:flex;align-items:center;gap:10px;overflow-x:auto;min-height:52px;scrollbar-width:none;}
+.opts::-webkit-scrollbar{display:none;}
+.swatch{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.18);flex-shrink:0;cursor:pointer;padding:0;}
+.swatch.on{outline:2.5px solid #fff;outline-offset:2px;}
+.seg{display:flex;background:var(--panel-2);border-radius:8px;padding:2px;flex-shrink:0;}
+.seg button{border:none;background:none;padding:6px 10px;font-size:12.5px;font-weight:700;border-radius:6px;color:var(--muted);cursor:pointer;}
+.seg button.on{background:#3b4652;color:#fff;}
+.optbtn{flex-shrink:0;border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:7px 11px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.optbtn.danger{color:#ff8a80;}
+.optlabel{font-size:11px;color:var(--muted);flex-shrink:0;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+.vsep{width:1px;height:24px;background:var(--line);flex-shrink:0;}
+.hint{font-size:12.5px;color:var(--muted);flex-shrink:0;}
+.tools{display:flex;gap:2px;overflow-x:auto;padding:4px 6px calc(6px + var(--safe-b));background:var(--bg);scrollbar-width:none;}
+.tools::-webkit-scrollbar{display:none;}
+.tool{flex:0 0 auto;min-width:58px;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 6px;border-radius:10px;font-size:10.5px;font-weight:600;color:var(--muted);cursor:pointer;}
+.tool svg{width:24px;height:24px;}
+.tool.on{background:var(--panel-2);color:#fff;}
+.tool.on svg{color:var(--copper-2);}
+
+/* ---------- SHEETS ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center;}
+.sheet{background:var(--panel);width:100%;max-width:640px;border-radius:18px 18px 0 0;padding:10px 18px calc(18px + var(--safe-b));max-height:92vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,.5);}
+.grab{width:40px;height:5px;border-radius:3px;background:#46505c;margin:2px auto 12px;}
+.sheet h2{font-family:var(--serif);font-weight:600;font-size:21px;margin:0 0 14px;}
+.sheet label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;}
+.sheet input[type=text],.sheet textarea,.sheet select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:12px;}
+.sheet textarea{min-height:120px;resize:vertical;line-height:1.45;}
+.dict{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.4;}
+.mic{flex-shrink:0;border:1px solid var(--line);background:var(--panel-2);border-radius:20px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;}
+.mic.live{background:#a13c3c;border-color:#a13c3c;color:#fff;}
+.choice{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.choice button{border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:12px 6px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.25;}
+.choice button small{display:block;font-weight:500;color:var(--muted);font-size:11px;margin-top:3px;}
+.choice button.on{border-color:var(--copper);background:rgba(193,122,79,.14);}
+.preview{margin-top:16px;border-radius:10px;overflow:hidden;background:#000;border:1px solid var(--line);}
+.preview img{display:block;width:100%;}
+.pmeta{font-size:12px;color:var(--muted);margin-top:6px;text-align:right;}
+.actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px;}
+.big{border:none;border-radius:12px;padding:16px;font-size:17px;font-weight:700;background:var(--copper);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+.big svg{width:22px;height:22px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ghost{border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px;}
+details.more{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;}
+details.more summary{font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;padding:4px 0;}
+
+#toast{position:fixed;left:50%;bottom:calc(110px + var(--safe-b));transform:translate(-50%,16px);background:#eef1f4;color:#14181d;padding:10px 16px;border-radius:9px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:100;max-width:90vw;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.4);}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+
+<!-- ================= HOME ================= -->
+<section id="home">
+  <div class="brand">
+    <img src="../assets/logo-icon.png" alt="">
+    <div><div class="eyebrow">Tyrtrek Security</div><h1>Photo Markup</h1></div>
+  </div>
+
+  <div class="cta">
+    <button class="primary" id="btnCamera">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg>
+      Take Photo</button>
+    <button class="secondary" id="btnLibrary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="9.5" r="1.8"/><path d="m21 15.5-5-5L5 20"/></svg>
+      Choose Photo</button>
+  </div>
+  <input type="file" id="fileCamera" accept="image/*" capture="environment" class="hidden">
+  <input type="file" id="fileLibrary" accept="image/*" class="hidden">
+
+  <div class="sec-title"><span>Recent</span></div>
+  <div id="recent"></div>
+
+  <div class="install" id="installTip">
+    <b>Add to your home screen:</b> in Safari tap Share, then “Add to Home Screen.” It opens full-screen and works without signal. Edits are kept on this phone only.
+  </div>
+
+  <p class="foot">Mark up a photo, add notes by typing or dictation, then send it by Messages, Signal, or email. Photos never leave your phone unless you share them.
+  <br><a href="../">tyrtrek.com</a> · <a href="../capture/">Field Capture</a></p>
+</section>
+
+<!-- ================= EDITOR ================= -->
+<section id="editor" class="hidden">
+  <div class="topbar">
+    <button class="tb-btn" id="btnBack" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="tb-btn" id="btnUndo" aria-label="Undo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button class="tb-btn" id="btnRedo" aria-label="Redo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <div class="tb-spacer"></div>
+    <button class="tb-btn" id="btnNotes" aria-label="Notes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h4"/></svg> Notes</button>
+    <button class="tb-btn tb-done" id="btnDone">Share</button>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div class="opts" id="opts"></div>
+  <div class="tools" id="tools"></div>
+</section>
+
+<!-- ================= NOTES SHEET ================= -->
+<div class="scrim hidden" id="notesSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>Notes</h2>
+    <label class="f" for="inTitle">Title <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></label>
+    <input type="text" id="inTitle" placeholder="e.g. North loading dock door" autocomplete="off">
+    <label class="f" for="inNotes">Notes</label>
+    <textarea id="inNotes" placeholder="Type, or tap the microphone on your keyboard to dictate."></textarea>
+    <div class="dict" id="dictRow">
+      <button class="mic hidden" id="btnMic" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        <span>Dictate</span></button>
+      <span id="dictHint">To dictate, tap the microphone key on your iPhone keyboard. It works offline on recent iPhones.</span>
+    </div>
+    <label class="f" for="inLocation">Location / site <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></label>
+    <input type="text" id="inLocation" placeholder="e.g. Building C, east entrance" autocomplete="off">
+    <div class="actions"><button class="big" id="btnNotesDone">Done</button></div>
+  </div>
+</div>
+
+<!-- ================= TEXT LABEL SHEET ================= -->
+<div class="scrim hidden" id="labelSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2 id="labelSheetTitle">Label text</h2>
+    <input type="text" id="inLabel" maxlength="60" placeholder="e.g. Unlocked gate" autocomplete="off">
+    <div class="row2" style="margin-top:14px">
+      <button class="ghost" id="btnLabelCancel">Cancel</button>
+      <button class="big" id="btnLabelOk" style="padding:13px">Place label</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SHARE SHEET ================= -->
+<div class="scrim hidden" id="shareSheet">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>Share</h2>
+
+    <label class="f">Include the notes</label>
+    <div class="choice" id="noteMode">
+      <button data-v="caption">On the image<small>caption strip</small></button>
+      <button data-v="file">Text file<small>sent alongside</small></button>
+      <button data-v="both">Both<small>image + file</small></button>
+    </div>
+
+    <label class="f">Size</label>
+    <div class="choice" id="sizeMode">
+      <button data-v="1600">Message<small>Texts, Signal</small></button>
+      <button data-v="2400">Email<small>sharper detail</small></button>
+      <button data-v="full">Full<small>original size</small></button>
+    </div>
+
+    <div class="preview"><img id="prevImg" alt="Preview of the image to be shared"></div>
+    <div class="pmeta" id="prevMeta"></div>
+
+    <div class="actions">
+      <button class="big" id="btnShare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+        Share…</button>
+      <div class="row2">
+        <button class="ghost" id="btnSave">Save to device</button>
+        <button class="ghost" id="btnCopy">Copy notes</button>
+      </div>
+    </div>
+    <p class="note">Share opens your phone’s share sheet: pick Messages, Signal, Mail, or “Save Image.” If the text file option is on, both files go together.</p>
+
+    <details class="more">
+      <summary>Send to a Tyrtrek assessment</summary>
+      <p class="note" style="margin-top:6px">Adds this marked-up photo to the Field Capture library on this phone as a new finding, with your notes as the vulnerability description. The report builders can pull it in from there.</p>
+      <div class="row2" style="margin-top:8px">
+        <button class="ghost" id="btnToCaptureFac">Facility finding</button>
+        <button class="ghost" id="btnToCaptureRes">Residential finding</button>
+      </div>
+      <label class="f" for="inBrand">Caption footer text</label>
+      <input type="text" id="inBrand" placeholder="e.g. Tyrtrek Security · rt@tyrtrek.com" autocomplete="off">
+      <p class="note" style="margin-top:6px">Printed at the bottom of the caption strip. Saved on this phone for next time.</p>
+    </details>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../shared/finding-kit.js" defer></script>
+<script>
+'use strict';
+/* =====================================================================
+   Tyrtrek Photo Markup
+   All marks are stored as editable objects in IMAGE pixel coordinates.
+   draw() renders them at any scale, so the editor view and the exported
+   file come from the same code.
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2600); }
+
+const MAX_EDGE = 2600;
+const COLORS = ['#e53935','#ffb300','#2e9e4f','#1e63d6','#ffffff','#111111'];
+const LIGHT = new Set(['#ffb300','#ffffff']);
+const SIZES = { S:0.7, M:1, L:1.45 };
+
+/* ---------------- STORAGE (IndexedDB, own database) ---------------- */
+let dbp = null;
+function db(){
+  if(dbp) return dbp;
+  dbp = new Promise((res, rej)=>{
+    const r = indexedDB.open('tyrtrek-markup', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('items', { keyPath:'id' });
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  dbp.catch(()=>{ dbp = null; });
+  return dbp;
+}
+async function dbPut(v){ const d = await db(); return new Promise((res,rej)=>{ const tx = d.transaction('items','readwrite'); tx.objectStore('items').put(v); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+async function dbAll(){ const d = await db(); return new Promise((res,rej)=>{ const r = d.transaction('items').objectStore('items').getAll(); r.onsuccess = () => res(r.result||[]); r.onerror = () => rej(r.error); }); }
+async function dbDel(id){ const d = await db(); return new Promise((res,rej)=>{ const tx = d.transaction('items','readwrite'); tx.objectStore('items').delete(id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v==null ? d : v; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+
+/* ---------------- DOCUMENT STATE ---------------- */
+let doc = null;          // { id, img (dataURL), w, h, objs:[], title, notes, location, createdAt, updatedAt }
+let img = null;          // HTMLImageElement
+let baseLayer = null, baseSig = '', blurCanvas = null;
+let hist = [], redo = [];
+let tool = 'arrow', sel = null;
+let style = { color: lsGet('mk.color', COLORS[0]), size: lsGet('mk.size','M'), fill:false, blurMode:'blur' };
+let shareOpts = { notes: lsGet('mk.notes','both'), size: lsGet('mk.sizeMode','1600') };
+
+/* Unit in image px: everything (stroke widths, fonts, radii) scales from it. */
+function U(){ return Math.min(doc.w, doc.h) / 220; }
+
+/* ---------------- LOADING A PHOTO ---------------- */
+function loadImg(src){ return new Promise((res,rej)=>{ const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Could not open that image')); i.src = src; }); }
+async function fileToDataURL(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const i = await loadImg(url);
+    const s = Math.min(1, MAX_EDGE / Math.max(i.naturalWidth, i.naturalHeight));
+    const w = Math.round(i.naturalWidth*s), h = Math.round(i.naturalHeight*s);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(i, 0, 0, w, h);
+    return { dataUrl: c.toDataURL('image/jpeg', 0.9), w, h };
+  } finally { URL.revokeObjectURL(url); }
+}
+async function onPick(e){
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if(!f) return;
+  try{
+    const r = await fileToDataURL(f);
+    const now = new Date().toISOString();
+    await openDoc({ id: uid(), img: r.dataUrl, w: r.w, h: r.h, objs: [], title:'', notes:'', location:'', createdAt: now, updatedAt: now });
+    save();
+  }catch(err){ toast(err.message || 'Could not open that photo'); }
+}
+$('btnCamera').onclick = () => $('fileCamera').click();
+$('btnLibrary').onclick = () => $('fileLibrary').click();
+$('fileCamera').onchange = onPick;
+$('fileLibrary').onchange = onPick;
+
+async function openDoc(d){
+  doc = d; img = await loadImg(d.img);
+  blurCanvas = null; baseLayer = null; baseSig = '';
+  hist = []; redo = []; sel = null;
+  $('home').classList.add('hidden'); $('editor').classList.remove('hidden');
+  history.pushState({ editor:true }, '');
+  renderTools(); renderOpts(); fit(); draw();
+}
+function closeEditor(){
+  save(true);
+  $('editor').classList.add('hidden'); $('home').classList.remove('hidden');
+  doc = null; img = null; renderRecent();
+}
+$('btnBack').onclick = () => { if(history.state && history.state.editor) history.back(); else closeEditor(); };
+window.addEventListener('popstate', () => { if(doc) closeEditor(); });
+
+/* ---------------- SAVE / RECENT ---------------- */
+let saveT = null;
+function save(now){
+  if(!doc) return;
+  clearTimeout(saveT);
+  const run = async () => {
+    if(!doc) return;
+    doc.updatedAt = new Date().toISOString();
+    try{ doc.thumb = await renderThumb(); await dbPut(JSON.parse(JSON.stringify(doc))); }catch(e){}
+  };
+  if(now) run(); else saveT = setTimeout(run, 700);
+}
+async function renderThumb(){
+  const c = renderComposite(320, false); return c.toDataURL('image/jpeg', 0.7);
+}
+async function renderRecent(){
+  let items = [];
+  try{ items = await dbAll(); }catch(e){}
+  items.sort((a,b)=> (b.updatedAt||'').localeCompare(a.updatedAt||''));
+  // keep the library small: last 30 edits
+  items.slice(30).forEach(i => dbDel(i.id).catch(()=>{}));
+  items = items.slice(0,30);
+  const el = $('recent');
+  if(!items.length){ el.innerHTML = '<div class="empty">Your marked-up photos will appear here.</div>'; return; }
+  el.innerHTML = '<div class="recent">' + items.map(i => `
+    <div class="rcard" data-id="${i.id}">
+      <img src="${i.thumb || i.img}" alt="">
+      <div class="rmeta">${esc(i.title || new Date(i.updatedAt).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}))}</div>
+      <button class="rdel" data-del="${i.id}" aria-label="Delete">×</button>
+    </div>`).join('') + '</div>';
+  el.querySelectorAll('.rcard').forEach(card => card.onclick = async (e) => {
+    const delId = e.target.dataset && e.target.dataset.del;
+    if(delId){ e.stopPropagation(); if(confirm('Delete this marked-up photo from this phone?')){ await dbDel(delId); renderRecent(); } return; }
+    const it = items.find(x => x.id === card.dataset.id);
+    if(it) openDoc(Object.assign({ objs:[], title:'', notes:'', location:'' }, it));
+  });
+}
+
+/* ---------------- HISTORY ---------------- */
+function snapshot(){ return JSON.stringify(doc.objs); }
+function commit(before){
+  if(before === snapshot()) return;
+  hist.push(before); if(hist.length > 80) hist.shift(); redo = [];
+  updateUndo(); save();
+}
+function updateUndo(){ $('btnUndo').disabled = !hist.length; $('btnRedo').disabled = !redo.length; }
+$('btnUndo').onclick = () => { if(!hist.length) return; redo.push(snapshot()); doc.objs = JSON.parse(hist.pop()); sel = null; updateUndo(); renderOpts(); draw(); save(); };
+$('btnRedo').onclick = () => { if(!redo.length) return; hist.push(snapshot()); doc.objs = JSON.parse(redo.pop()); sel = null; updateUndo(); renderOpts(); draw(); save(); };
+
+/* ---------------- VIEW ---------------- */
+const cv = $('cv'), ctx = cv.getContext('2d');
+let view = { k:1, ox:0, oy:0, dpr:1, W:0, H:0 };
+function fit(){
+  if(!doc) return;
+  const st = $('stage').getBoundingClientRect();
+  const pad = 14;
+  const k = Math.min((st.width - pad*2)/doc.w, (st.height - pad*2)/doc.h);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  view = { k, dpr, W: st.width, H: st.height, ox: (st.width - doc.w*k)/2, oy: (st.height - doc.h*k)/2 };
+  cv.width = Math.round(st.width*dpr); cv.height = Math.round(st.height*dpr);
+  cv.style.width = st.width + 'px'; cv.style.height = st.height + 'px';
+}
+window.addEventListener('resize', () => { if(doc){ fit(); draw(); } });
+function toImg(e){
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left - view.ox)/view.k, y: (e.clientY - r.top - view.oy)/view.k };
+}
+
+/* ---------------- BLUR / BASE LAYER ----------------
+   A blurred copy of the whole photo is made once (repeated down/up-scaling,
+   which works in every browser including Safari). Blur marks clip into it. */
+function getBlurCanvas(){
+  if(blurCanvas) return blurCanvas;
+  let src = img, w = doc.w, h = doc.h;
+  const steps = [0.25, 0.08, 0.035];
+  let c;
+  for(const f of steps){
+    const sw = Math.max(2, Math.round(doc.w*f)), sh = Math.max(2, Math.round(doc.h*f));
+    c = document.createElement('canvas'); c.width = sw; c.height = sh;
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, sw, sh);
+    src = c;
+  }
+  // scale back up in two smooth steps
+  for(const f of [0.12, 1]){
+    const sw = Math.round(doc.w*f), sh = Math.round(doc.h*f);
+    const u = document.createElement('canvas'); u.width = sw; u.height = sh;
+    const x = u.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, sw, sh);
+    src = u;
+  }
+  blurCanvas = src; return blurCanvas;
+}
+function blurPath(x, o){
+  x.beginPath();
+  if(o.type === 'blurRect'){ const b = box(o); x.rect(b.x, b.y, b.w, b.h); }
+  else { o.pts.forEach((p,i) => i ? x.lineTo(p[0],p[1]) : x.moveTo(p[0],p[1])); x.closePath(); }
+}
+/* Photo + redactions. Everything else (including magnifiers) draws from this,
+   so a blurred plate stays blurred inside a zoom callout. */
+function getBase(){
+  const blurs = doc.objs.filter(o => o.type==='blurRect' || o.type==='blurFree');
+  const sig = JSON.stringify(blurs);
+  if(baseLayer && sig === baseSig) return baseLayer;
+  const c = document.createElement('canvas'); c.width = doc.w; c.height = doc.h;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+  blurs.forEach(o => {
+    x.save(); blurPath(x, o);
+    if(o.mode === 'solid'){ x.fillStyle = '#111'; x.fill(); }
+    else { x.clip(); x.drawImage(getBlurCanvas(), 0, 0); }
+    x.restore();
+  });
+  baseLayer = c; baseSig = sig; return c;
+}
+
+/* ---------------- GEOMETRY ---------------- */
+function box(o){ return { x: Math.min(o.x1,o.x2), y: Math.min(o.y1,o.y2), w: Math.abs(o.x2-o.x1), h: Math.abs(o.y2-o.y1) }; }
+function rr(x, X, Y, W, H, r){ r = Math.max(0, Math.min(r, W/2, H/2)); x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+W,Y,X+W,Y+H,r); x.arcTo(X+W,Y+H,X,Y+H,r); x.arcTo(X,Y+H,X,Y,r); x.arcTo(X,Y,X+W,Y,r); x.closePath(); }
+function hexA(hex, a){ const n = parseInt(hex.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+function textOn(c){ return LIGHT.has(c) ? '#111' : '#fff'; }
+function smoothPath(x, pts){
+  x.beginPath();
+  if(pts.length < 3){ pts.forEach((p,i)=> i ? x.lineTo(p[0],p[1]) : x.moveTo(p[0],p[1])); if(pts.length===1) x.lineTo(pts[0][0]+0.1, pts[0][1]); return; }
+  x.moveTo(pts[0][0], pts[0][1]);
+  for(let i=1;i<pts.length-1;i++){ const mx = (pts[i][0]+pts[i+1][0])/2, my = (pts[i][1]+pts[i+1][1])/2; x.quadraticCurveTo(pts[i][0], pts[i][1], mx, my); }
+  const l = pts[pts.length-1]; x.lineTo(l[0], l[1]);
+}
+
+/* ---------------- RENDER ONE MARK ----------------
+   x: context already transformed to image space. S: image px -> device px
+   (shadows are not affected by the transform, so they are scaled by hand). */
+function shadow(x, S, a){ x.shadowColor = `rgba(0,0,0,${a==null?.38:a})`; x.shadowBlur = U()*2.2*S; x.shadowOffsetY = U()*0.7*S; }
+function noShadow(x){ x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0; }
+
+function drawMark(x, o, S){
+  const u = U(), m = SIZES[o.size] || 1, c = o.color || COLORS[0];
+  const w = u * 1.6 * m;
+  x.save(); x.lineJoin = 'round'; x.lineCap = 'round';
+
+  if(o.type === 'arrow'){
+    const dx = o.x2-o.x1, dy = o.y2-o.y1, L = Math.hypot(dx,dy) || 1, a = Math.atan2(dy,dx);
+    const hl = Math.min(L*0.45, w*5), hw = w*2.5, sw = w*1.15, tw = w*0.35;
+    const pts = [[0,-tw/2],[L-hl,-sw/2],[L-hl,-hw],[L,0],[L-hl,hw],[L-hl,sw/2],[0,tw/2]];
+    const P = pts.map(([px,py]) => [o.x1 + px*Math.cos(a) - py*Math.sin(a), o.y1 + px*Math.sin(a) + py*Math.cos(a)]);
+    const path = () => { x.beginPath(); P.forEach((p,i)=> i ? x.lineTo(p[0],p[1]) : x.moveTo(p[0],p[1])); x.closePath(); };
+    shadow(x, S); path(); x.fillStyle = c; x.fill(); noShadow(x);
+    path(); x.lineWidth = w*0.28; x.strokeStyle = LIGHT.has(c) ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.9)'; x.stroke();
+    path(); x.fillStyle = c; x.fill();
+  }
+  else if(o.type === 'rect' || o.type === 'ellipse'){
+    const b = box(o);
+    const shape = () => { if(o.type==='rect') rr(x, b.x, b.y, b.w, b.h, w*2.2); else { x.beginPath(); x.ellipse(b.x+b.w/2, b.y+b.h/2, Math.max(1,b.w/2), Math.max(1,b.h/2), 0, 0, Math.PI*2); } };
+    if(o.fill){ shape(); x.fillStyle = hexA(c, 0.16); x.fill(); }
+    shadow(x, S); shape(); x.lineWidth = w + w*0.55; x.strokeStyle = LIGHT.has(c) ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.85)'; x.stroke(); noShadow(x);
+    shape(); x.lineWidth = w; x.strokeStyle = c; x.stroke();
+  }
+  else if(o.type === 'pen'){
+    shadow(x, S, .3); smoothPath(x, o.pts); x.lineWidth = w + w*0.55; x.strokeStyle = LIGHT.has(c) ? 'rgba(0,0,0,.45)' : 'rgba(255,255,255,.85)'; x.stroke(); noShadow(x);
+    smoothPath(x, o.pts); x.lineWidth = w; x.strokeStyle = c; x.stroke();
+  }
+  else if(o.type === 'highlight'){
+    x.globalAlpha = 0.36; x.lineCap = 'butt'; x.lineJoin = 'round';
+    smoothPath(x, o.pts); x.lineWidth = w*7; x.strokeStyle = c; x.stroke();
+  }
+  else if(o.type === 'label'){
+    const fs = u * 6.4 * m;
+    x.font = `700 ${fs}px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif`;
+    const t = o.text || 'Label', tw = x.measureText(t).width;
+    const px = fs*0.62, py = fs*0.42, bw = tw + px*2, bh = fs + py*2;
+    const X = o.x - bw/2, Y = o.y - bh/2;
+    shadow(x, S, .45); rr(x, X, Y, bw, bh, bh*0.32); x.fillStyle = c; x.fill(); noShadow(x);
+    rr(x, X, Y, bw, bh, bh*0.32); x.lineWidth = fs*0.07; x.strokeStyle = LIGHT.has(c) ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.55)'; x.stroke();
+    x.fillStyle = textOn(c); x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t, o.x, o.y + fs*0.04);
+    o._bw = bw; o._bh = bh;
+  }
+  else if(o.type === 'marker'){
+    const r = u * 5.6 * m;
+    shadow(x, S, .45); x.beginPath(); x.arc(o.x, o.y, r, 0, Math.PI*2); x.fillStyle = c; x.fill(); noShadow(x);
+    x.lineWidth = r*0.17; x.strokeStyle = LIGHT.has(c) ? '#111' : '#fff'; x.stroke();
+    x.fillStyle = textOn(c); x.font = `800 ${r*1.12}px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif`;
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(o.n), o.x, o.y + r*0.06);
+  }
+  else if(o.type === 'magnify'){
+    const base = getBase();
+    const s = o.src, d = o.dst, z = d.r / s.r;
+    const ring = Math.max(w*0.9, d.r*0.035);
+    // connector lines: outer tangents between the two circles
+    const D = Math.hypot(d.x-s.x, d.y-s.y);
+    if(D > s.r + d.r*0.2){
+      const ang = Math.atan2(d.y-s.y, d.x-s.x);
+      const beta = Math.acos(clamp((d.r - s.r)/D, -1, 1));
+      x.lineWidth = ring*0.55; x.strokeStyle = hexA(c, .9);
+      shadow(x, S, .3);
+      [1,-1].forEach(sg => {
+        const t = ang + sg*beta;
+        x.beginPath(); x.moveTo(s.x - s.r*Math.cos(t), s.y - s.r*Math.sin(t)); x.lineTo(d.x - d.r*Math.cos(t), d.y - d.r*Math.sin(t));
+        x.stroke();
+      });
+      noShadow(x);
+    }
+    // source ring
+    x.beginPath(); x.arc(s.x, s.y, s.r, 0, Math.PI*2); x.lineWidth = ring*0.75; x.strokeStyle = 'rgba(255,255,255,.85)'; x.stroke();
+    x.beginPath(); x.arc(s.x, s.y, s.r, 0, Math.PI*2); x.lineWidth = ring*0.45; x.strokeStyle = c; x.stroke();
+    // magnified callout
+    shadow(x, S, .55); x.beginPath(); x.arc(d.x, d.y, d.r + ring/2, 0, Math.PI*2); x.fillStyle = c; x.fill(); noShadow(x);
+    x.save(); x.beginPath(); x.arc(d.x, d.y, d.r, 0, Math.PI*2); x.clip();
+    x.fillStyle = '#000'; x.fillRect(d.x-d.r, d.y-d.r, d.r*2, d.r*2);
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(base, s.x - s.r, s.y - s.r, s.r*2, s.r*2, d.x - d.r, d.y - d.r, d.r*2, d.r*2);
+    x.restore();
+    x.beginPath(); x.arc(d.x, d.y, d.r - ring*0.15, 0, Math.PI*2); x.lineWidth = ring*0.3; x.strokeStyle = 'rgba(255,255,255,.9)'; x.stroke();
+    // zoom badge
+    if(o.badge !== false){
+      const fs = Math.max(u*3.2, d.r*0.14);
+      x.font = `800 ${fs}px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif`;
+      const t = (Math.round(z*10)/10) + '×', tw = x.measureText(t).width;
+      const bw = tw + fs*0.9, bh = fs*1.45, bx = d.x - bw/2, by = d.y + d.r - bh*0.55;
+      shadow(x, S, .4); rr(x, bx, by, bw, bh, bh/2); x.fillStyle = c; x.fill(); noShadow(x);
+      x.fillStyle = textOn(c); x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t, d.x, by + bh/2 + fs*0.03);
+    }
+  }
+  x.restore();
+}
+
+/* Order: magnifiers last so they sit on top of every other mark. */
+function drawAll(x, S){
+  doc.objs.filter(o => !/^blur/.test(o.type) && o.type !== 'magnify').forEach(o => drawMark(x, o, S));
+  doc.objs.filter(o => o.type === 'magnify').forEach(o => drawMark(x, o, S));
+}
+
+/* ---------------- EDITOR DRAW ---------------- */
+let draft = null;   // mark being drawn
+function draw(){
+  if(!doc) return;
+  const { k, dpr, ox, oy } = view;
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.setTransform(k*dpr, 0, 0, k*dpr, ox*dpr, oy*dpr);
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 18*dpr; ctx.drawImage(getBase(), 0, 0); ctx.restore();
+  // show blur outlines faintly while editing so they can be found again
+  doc.objs.filter(o => /^blur/.test(o.type)).forEach(o => {
+    if(o.id !== (sel && sel.id) && tool !== 'blur' && tool !== 'lasso') return;
+    ctx.save(); blurPath(ctx, o); ctx.setLineDash([6/k, 5/k]); ctx.lineWidth = 1.5/k; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.stroke(); ctx.restore();
+  });
+  const S = k*dpr;
+  drawAll(ctx, S);
+  if(draft){
+    if(/^blur/.test(draft.type)){
+      ctx.save(); blurPath(ctx, draft);
+      if(draft.type==='blurRect' || draft.pts.length > 2){ ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill(); }
+      ctx.setLineDash([6/k,5/k]); ctx.lineWidth = 2/k; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore();
+    } else if(draft.type === 'magnify-src'){
+      ctx.save(); ctx.beginPath(); ctx.arc(draft.x, draft.y, draft.r, 0, Math.PI*2); ctx.lineWidth = 2.5/k; ctx.strokeStyle = style.color; ctx.setLineDash([7/k,5/k]); ctx.stroke(); ctx.restore();
+    } else drawMark(ctx, draft, S);
+  }
+  if(sel) drawSelection(sel);
+}
+function handlesFor(o){
+  if(o.type==='rect' || o.type==='ellipse' || o.type==='blurRect') return [['a',o.x1,o.y1],['b',o.x2,o.y1],['c',o.x2,o.y2],['d',o.x1,o.y2]];
+  if(o.type==='arrow') return [['p1',o.x1,o.y1],['p2',o.x2,o.y2]];
+  if(o.type==='magnify') return [['sr', o.src.x + o.src.r*Math.SQRT1_2, o.src.y + o.src.r*Math.SQRT1_2], ['dr', o.dst.x + o.dst.r*Math.SQRT1_2, o.dst.y + o.dst.r*Math.SQRT1_2]];
+  return [];
+}
+function bounds(o){
+  if(o.type==='rect'||o.type==='ellipse'||o.type==='blurRect'||o.type==='arrow') return box(o);
+  if(o.pts){ const xs = o.pts.map(p=>p[0]), ys = o.pts.map(p=>p[1]); return { x:Math.min(...xs), y:Math.min(...ys), w:Math.max(...xs)-Math.min(...xs), h:Math.max(...ys)-Math.min(...ys) }; }
+  if(o.type==='label'){ const bw = o._bw||U()*20, bh = o._bh||U()*8; return { x:o.x-bw/2, y:o.y-bh/2, w:bw, h:bh }; }
+  if(o.type==='marker'){ const r = U()*5.6*(SIZES[o.size]||1); return { x:o.x-r, y:o.y-r, w:r*2, h:r*2 }; }
+  if(o.type==='magnify'){ const d = o.dst; return { x:d.x-d.r, y:d.y-d.r, w:d.r*2, h:d.r*2 }; }
+  return { x:0,y:0,w:0,h:0 };
+}
+function drawSelection(o){
+  const k = view.k, b = bounds(o), p = 6/k;
+  ctx.save();
+  ctx.setLineDash([5/k,4/k]); ctx.lineWidth = 1.5/k; ctx.strokeStyle = '#fff';
+  if(o.type === 'magnify'){
+    [o.src, o.dst].forEach(c => { ctx.beginPath(); ctx.arc(c.x, c.y, c.r + p, 0, Math.PI*2); ctx.stroke(); });
+  } else if(o.type !== 'arrow'){ ctx.strokeRect(b.x-p, b.y-p, b.w+p*2, b.h+p*2); }
+  ctx.setLineDash([]);
+  handlesFor(o).forEach(([,hx,hy]) => {
+    ctx.beginPath(); ctx.arc(hx, hy, 8/k, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.lineWidth = 2.5/k; ctx.strokeStyle = '#c17a4f'; ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* ---------------- HIT TESTING ---------------- */
+function distSeg(px,py,x1,y1,x2,y2){ const dx=x2-x1, dy=y2-y1, l=dx*dx+dy*dy; let t = l ? ((px-x1)*dx+(py-y1)*dy)/l : 0; t = clamp(t,0,1); return Math.hypot(px-(x1+t*dx), py-(y1+t*dy)); }
+function inPoly(px,py,pts){ let ins=false; for(let i=0,j=pts.length-1;i<pts.length;j=i++){ const [xi,yi]=pts[i],[xj,yj]=pts[j]; if(((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }
+function hit(o, x, y){
+  const t = 16/view.k, w = U()*1.6*(SIZES[o.size]||1);
+  if(o.type==='rect'||o.type==='ellipse'||o.type==='blurRect'){ const b = box(o); return x>=b.x-t && x<=b.x+b.w+t && y>=b.y-t && y<=b.y+b.h+t; }
+  if(o.type==='arrow') return distSeg(x,y,o.x1,o.y1,o.x2,o.y2) < t + w*2;
+  if(o.type==='pen'||o.type==='highlight'){ const lw = o.type==='highlight' ? w*3.5 : w; for(let i=1;i<o.pts.length;i++) if(distSeg(x,y,o.pts[i-1][0],o.pts[i-1][1],o.pts[i][0],o.pts[i][1]) < t + lw) return true; return o.pts.length===1 && Math.hypot(x-o.pts[0][0],y-o.pts[0][1]) < t+lw; }
+  if(o.type==='blurFree') return inPoly(x,y,o.pts);
+  if(o.type==='label'||o.type==='marker'){ const b = bounds(o); return x>=b.x-t && x<=b.x+b.w+t && y>=b.y-t && y<=b.y+b.h+t; }
+  if(o.type==='magnify') return Math.hypot(x-o.dst.x,y-o.dst.y) < o.dst.r + t || Math.hypot(x-o.src.x,y-o.src.y) < o.src.r + t;
+  return false;
+}
+function topHit(x,y){
+  // magnifiers draw last, so test them first; blur marks last
+  const order = doc.objs.filter(o=>o.type==='magnify').concat(doc.objs.filter(o=>!/^blur/.test(o.type)&&o.type!=='magnify'), doc.objs.filter(o=>/^blur/.test(o.type)));
+  for(let i=order.length-1;i>=0;i--) if(hit(order[i],x,y)) return order[i];
+  return null;
+}
+function hitHandle(o, x, y){
+  const t = 22/view.k;
+  for(const [id,hx,hy] of handlesFor(o)) if(Math.hypot(x-hx,y-hy) < t) return id;
+  return null;
+}
+
+/* ---------------- POINTER INTERACTION ---------------- */
+let drag = null;
+cv.addEventListener('pointerdown', e => {
+  if(!doc) return;
+  e.preventDefault(); cv.setPointerCapture(e.pointerId);
+  const p = toImg(e);
+  const before = snapshot();
+  // 1. handle of the selected mark
+  if(sel){
+    const h = hitHandle(sel, p.x, p.y);
+    if(h){ drag = { mode:'handle', h, o:sel, before, start:p }; return; }
+  }
+  // 2. body of a mark: select tool always, drawing tools when tapping the selected mark
+  const hitO = topHit(p.x, p.y);
+  if(tool === 'select' || (hitO && sel && hitO.id === sel.id)){
+    if(hitO){
+      sel = hitO; renderOpts();
+      let part = 'all';
+      if(hitO.type==='magnify') part = Math.hypot(p.x-hitO.dst.x,p.y-hitO.dst.y) < hitO.dst.r + 16/view.k ? 'dst' : 'src';
+      drag = { mode:'move', o:hitO, part, before, last:p, start:p, moved:false };
+    } else { sel = null; renderOpts(); }
+    draw(); return;
+  }
+  // 3. start drawing
+  sel = null;
+  const base = { id: uid(), color: style.color, size: style.size };
+  if(tool==='arrow') draft = Object.assign(base, { type:'arrow', x1:p.x, y1:p.y, x2:p.x, y2:p.y });
+  else if(tool==='rect'||tool==='ellipse') draft = Object.assign(base, { type:tool, x1:p.x, y1:p.y, x2:p.x, y2:p.y, fill:style.fill });
+  else if(tool==='pen'||tool==='highlight') draft = Object.assign(base, { type:tool, pts:[[p.x,p.y]] });
+  else if(tool==='blur') draft = { id:uid(), type:'blurRect', mode:style.blurMode, x1:p.x, y1:p.y, x2:p.x, y2:p.y };
+  else if(tool==='lasso') draft = { id:uid(), type:'blurFree', mode:style.blurMode, pts:[[p.x,p.y]] };
+  else if(tool==='magnify') draft = { type:'magnify-src', x:p.x, y:p.y, r:0 };
+  else draft = { type:'tap' };
+  drag = { mode:'draw', before, start:p, hitO, moved:false };
+  draw();
+});
+cv.addEventListener('pointermove', e => {
+  if(!drag) return;
+  const p = toImg(e);
+  if(Math.hypot(p.x-drag.start.x, p.y-drag.start.y)*view.k > 5) drag.moved = true;
+  if(drag.mode==='draw' && draft){
+    if('x2' in draft){ draft.x2 = p.x; draft.y2 = p.y; }
+    else if(draft.pts){ const l = draft.pts[draft.pts.length-1]; if(Math.hypot(p.x-l[0],p.y-l[1])*view.k > 2.5) draft.pts.push([p.x,p.y]); }
+    else if(draft.type==='magnify-src'){ draft.r = Math.hypot(p.x-draft.x, p.y-draft.y); }
+  } else if(drag.mode==='move'){
+    const dx = p.x-drag.last.x, dy = p.y-drag.last.y; drag.last = p;
+    moveMark(drag.o, dx, dy, drag.part);
+  } else if(drag.mode==='handle'){
+    const o = drag.o, h = drag.h;
+    if(h==='a'){ o.x1=p.x; o.y1=p.y; } else if(h==='b'){ o.x2=p.x; o.y1=p.y; }
+    else if(h==='c'){ o.x2=p.x; o.y2=p.y; } else if(h==='d'){ o.x1=p.x; o.y2=p.y; }
+    else if(h==='p1'){ o.x1=p.x; o.y1=p.y; } else if(h==='p2'){ o.x2=p.x; o.y2=p.y; }
+    else if(h==='sr'){ o.src.r = Math.max(U()*3, Math.hypot(p.x-o.src.x,p.y-o.src.y)); }
+    else if(h==='dr'){ o.dst.r = Math.max(o.src.r*1.1, Math.hypot(p.x-o.dst.x,p.y-o.dst.y)); }
+  }
+  draw();
+});
+function endPointer(){
+  if(!drag) return;
+  const d = drag; drag = null;
+  if(d.mode==='draw' && draft){
+    const dr = draft; draft = null;
+    const tiny = !d.moved;
+    if(tiny){
+      if(d.hitO){ sel = d.hitO; renderOpts(); draw(); return; }
+      const at = { x: clamp(d.start.x, U()*12, doc.w-U()*12), y: clamp(d.start.y, U()*7, doc.h-U()*7) };
+      if(tool==='label'){ askLabel(null, at); draw(); return; }
+      if(tool==='marker'){
+        const n = doc.objs.filter(o=>o.type==='marker').reduce((m,o)=>Math.max(m,o.n||0),0) + 1;
+        const o = { id:uid(), type:'marker', x:at.x, y:at.y, n, color:style.color, size:style.size };
+        doc.objs.push(o); sel = o; commit(d.before); renderOpts(); draw(); return;
+      }
+      if(tool==='pen' && dr.pts){ doc.objs.push(dr); sel = null; commit(d.before); draw(); return; } // a dot
+      draw(); return;
+    }
+    if(dr.type==='tap'){ draw(); return; }
+    let o = dr;
+    if(dr.type==='magnify-src'){
+      if(dr.r*view.k < 10){ draw(); return; }
+      o = makeMagnifier(dr.x, dr.y, dr.r);
+    }
+    if(o.type==='blurFree' && o.pts.length < 3){ draw(); return; }
+    if((o.type==='rect'||o.type==='ellipse'||o.type==='blurRect') && (Math.abs(o.x2-o.x1)*view.k < 8 || Math.abs(o.y2-o.y1)*view.k < 8)){ draw(); return; }
+    doc.objs.push(o);
+    sel = (o.type==='pen'||o.type==='highlight') ? null : o;
+    commit(d.before); renderOpts(); draw();
+    if(o.type==='magnify' && !lsGet('mk.zoomtip','')){ lsSet('mk.zoomtip','1'); toast('Drag the zoomed circle to place it. Drag the white dot to change the zoom.'); }
+    return;
+  }
+  if(d.mode==='move' || d.mode==='handle'){
+    if(d.mode==='handle' && /^[abcd]$/.test(d.h)){ const o = d.o; const b = box(o); o.x1=b.x; o.y1=b.y; o.x2=b.x+b.w; o.y2=b.y+b.h; }
+    commit(d.before); draw();
+  }
+}
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', () => { drag = null; draft = null; draw(); });
+
+function moveMark(o, dx, dy, part){
+  if(o.type==='magnify'){
+    if(part!=='src'){ o.dst.x += dx; o.dst.y += dy; }
+    if(part==='src'){ o.src.x += dx; o.src.y += dy; }
+    return;
+  }
+  if('x1' in o){ o.x1+=dx; o.x2+=dx; o.y1+=dy; o.y2+=dy; }
+  else if(o.pts) o.pts.forEach(p=>{ p[0]+=dx; p[1]+=dy; });
+  else { o.x+=dx; o.y+=dy; }
+}
+/* Place the zoom callout in the open spot farthest from the circled area. */
+function makeMagnifier(x, y, r){
+  const short = Math.min(doc.w, doc.h);
+  const R = clamp(r*2.6, short*0.12, short*0.3);
+  const m = R + U()*4;
+  const cands = [[m,m],[doc.w-m,m],[m,doc.h-m],[doc.w-m,doc.h-m],[doc.w/2,m],[doc.w/2,doc.h-m],[m,doc.h/2],[doc.w-m,doc.h/2]];
+  const others = doc.objs.filter(o=>o.type==='magnify').map(o=>o.dst)
+    .concat(doc.objs.filter(o=>o.type!=='magnify' && !/^blur/.test(o.type)).map(o=>{ const b = bounds(o); return { x:b.x+b.w/2, y:b.y+b.h/2, r:Math.max(b.w,b.h)/2 }; }));
+  let best = cands[0], bestScore = -Infinity;
+  cands.forEach(([cx,cy]) => {
+    const dSrc = Math.hypot(cx-x, cy-y) - R - r;
+    const clash = others.reduce((s,d)=> s + Math.max(0, d.r + R - Math.hypot(cx-d.x, cy-d.y)), 0);
+    const score = Math.min(dSrc, short*0.35) - clash*3 - (dSrc < 0 ? 1e6 : 0) + (dSrc > 0 ? -Math.hypot(cx-x,cy-y)*0.15 : 0);
+    if(score > bestScore){ bestScore = score; best = [cx,cy]; }
+  });
+  return { id:uid(), type:'magnify', color:style.color, size:style.size, src:{ x, y, r }, dst:{ x:best[0], y:best[1], r:R } };
+}
+
+/* ---------------- LABEL TEXT ---------------- */
+let labelCtx = null;
+function askLabel(existing, at){
+  labelCtx = { existing, at };
+  $('inLabel').value = existing ? existing.text : '';
+  $('labelSheetTitle').textContent = existing ? 'Edit label' : 'Label text';
+  $('btnLabelOk').textContent = existing ? 'Save' : 'Place label';
+  $('labelSheet').classList.remove('hidden');
+  setTimeout(()=>$('inLabel').focus(), 60);
+}
+$('btnLabelCancel').onclick = () => { $('labelSheet').classList.add('hidden'); labelCtx = null; };
+function labelOk(){
+  const t = $('inLabel').value.trim();
+  $('labelSheet').classList.add('hidden');
+  if(!labelCtx || !t){ labelCtx = null; return; }
+  const before = snapshot();
+  if(labelCtx.existing){ labelCtx.existing.text = t; sel = labelCtx.existing; }
+  else { const o = { id:uid(), type:'label', x:labelCtx.at.x, y:labelCtx.at.y, text:t, color:style.color, size:style.size }; doc.objs.push(o); sel = o; }
+  labelCtx = null; commit(before); renderOpts(); draw();
+}
+$('btnLabelOk').onclick = labelOk;
+$('inLabel').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); labelOk(); } });
+
+/* ---------------- TOOLBAR ---------------- */
+const I = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const TOOLS = [
+  { id:'select',   label:'Select',  icon:I('<path d="M5 3l14 8-6 1.5L10 19z"/>') },
+  { id:'arrow',    label:'Arrow',   icon:I('<path d="M5 19 19 5"/><path d="M10 5h9v9"/>') },
+  { id:'rect',     label:'Box',     icon:I('<rect x="4" y="5" width="16" height="14" rx="3"/>') },
+  { id:'ellipse',  label:'Circle',  icon:I('<ellipse cx="12" cy="12" rx="8.5" ry="7"/>') },
+  { id:'magnify',  label:'Zoom',    icon:I('<circle cx="7.5" cy="16" r="3"/><circle cx="15.5" cy="8.5" r="5.5"/><path d="M9.6 13.8l2.2-2.1"/>') },
+  { id:'blur',     label:'Blur box',icon:I('<rect x="4" y="5" width="16" height="14" rx="2" stroke-dasharray="3 2.5"/><path d="M8 10h2M12 10h4M8 14h5M15 14h1"/>') },
+  { id:'lasso',    label:'Blur draw',icon:I('<path d="M6 8c2-4 11-4 13 0s-3 9-8 9-7-4-5-9z" stroke-dasharray="3 2.5"/><path d="M9 11h2M13 11h2M10 14h4"/>') },
+  { id:'label',    label:'Label',   icon:I('<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 12h8"/>') },
+  { id:'marker',   label:'Number',  icon:I('<circle cx="12" cy="12" r="8"/><path d="M11 9l1.5-1v8"/>') },
+  { id:'pen',      label:'Draw',    icon:I('<path d="M4 20c4-1 5-6 9-9l5-5 2 2-5 5c-3 4-8 5-11 7z"/>') },
+  { id:'highlight',label:'Highlight',icon:I('<path d="M4 18h9"/><path d="M8 14l7-9 4 3-7 9H8z"/>') },
+];
+function renderTools(){
+  $('tools').innerHTML = TOOLS.map(t => `<button class="tool ${t.id===tool?'on':''}" data-t="${t.id}">${t.icon}<span>${t.label}</span></button>`).join('');
+  $('tools').querySelectorAll('.tool').forEach(b => b.onclick = () => { tool = b.dataset.t; if(tool!=='select') sel = null; renderTools(); renderOpts(); draw(); });
+}
+const HINTS = {
+  select:'Tap a mark to move or change it.', arrow:'Drag from the tail to the point.', rect:'Drag across the area.', ellipse:'Drag across the area.',
+  magnify:'Drag outward from the spot to zoom on.', blur:'Drag across what to hide.', lasso:'Trace around what to hide.',
+  label:'Tap where the label goes.', marker:'Tap to drop the next number.', pen:'Draw freehand.', highlight:'Drag over the area.'
+};
+function renderOpts(){
+  const el = $('opts');
+  const o = sel;
+  const kind = o ? o.type : ({ select:null, blur:'blurRect', lasso:'blurFree', magnify:'magnify' }[tool] || tool);
+  let h = '';
+  const isBlur = kind==='blurRect' || kind==='blurFree';
+  if(kind && !isBlur){
+    const cur = o ? o.color : style.color;
+    h += COLORS.map(c => `<button class="swatch ${c===cur?'on':''}" style="background:${c}" data-c="${c}" aria-label="Color"></button>`).join('');
+    if(kind !== 'highlight'){
+      const cs = o ? (o.size||'M') : style.size;
+      h += `<div class="vsep"></div><div class="seg" id="segSize">${['S','M','L'].map(s=>`<button data-s="${s}" class="${s===cs?'on':''}">${s}</button>`).join('')}</div>`;
+    }
+    if(kind==='rect'||kind==='ellipse'){ const f = o ? !!o.fill : style.fill; h += `<button class="optbtn" id="optFill">${f?'Tint: on':'Tint: off'}</button>`; }
+  }
+  if(isBlur){
+    const m = o ? o.mode : style.blurMode;
+    h += `<span class="optlabel">Style</span><div class="seg" id="segBlur"><button data-m="blur" class="${m==='blur'?'on':''}">Blur</button><button data-m="solid" class="${m==='solid'?'on':''}">Solid</button></div>`;
+  }
+  if(o){
+    if(o.type==='label') h += `<button class="optbtn" id="optEdit">Edit text</button>`;
+    if(o.type==='magnify') h += `<button class="optbtn" id="optBadge">${o.badge===false?'Show zoom ×':'Hide zoom ×'}</button>`;
+    h += `<button class="optbtn" id="optFront">Duplicate</button><button class="optbtn danger" id="optDel">Delete</button>`;
+  } else if(!kind || tool==='select'){
+    h += `<span class="hint">${HINTS[tool]}</span>`;
+  } else {
+    h += `<div class="vsep"></div><span class="hint">${HINTS[tool]}</span>`;
+  }
+  el.innerHTML = h;
+  el.querySelectorAll('.swatch').forEach(b => b.onclick = () => {
+    const c = b.dataset.c;
+    if(o){ const before = snapshot(); o.color = c; commit(before); }
+    else { style.color = c; lsSet('mk.color', c); }
+    renderOpts(); draw();
+  });
+  el.querySelectorAll('#segSize button').forEach(b => b.onclick = () => {
+    if(o){ const before = snapshot(); o.size = b.dataset.s; commit(before); } else { style.size = b.dataset.s; lsSet('mk.size', style.size); }
+    renderOpts(); draw();
+  });
+  el.querySelectorAll('#segBlur button').forEach(b => b.onclick = () => {
+    if(o){ const before = snapshot(); o.mode = b.dataset.m; commit(before); } else style.blurMode = b.dataset.m;
+    renderOpts(); draw();
+  });
+  const f = $('optFill'); if(f) f.onclick = () => { if(o){ const before = snapshot(); o.fill = !o.fill; commit(before); } else style.fill = !style.fill; renderOpts(); draw(); };
+  const ed = $('optEdit'); if(ed) ed.onclick = () => askLabel(o);
+  const bd = $('optBadge'); if(bd) bd.onclick = () => { const before = snapshot(); o.badge = o.badge === false; commit(before); renderOpts(); draw(); };
+  const dl = $('optDel'); if(dl) dl.onclick = () => { const before = snapshot(); doc.objs = doc.objs.filter(x=>x.id!==o.id); sel = null; commit(before); renderOpts(); draw(); };
+  const du = $('optFront'); if(du) du.onclick = () => {
+    const before = snapshot(); const c = JSON.parse(JSON.stringify(o)); c.id = uid(); moveMark(c, U()*8, U()*8, 'all');
+    if(c.type==='marker') c.n = doc.objs.filter(x=>x.type==='marker').reduce((m,x)=>Math.max(m,x.n||0),0)+1;
+    doc.objs.push(c); sel = c; commit(before); renderOpts(); draw();
+  };
+}
+
+/* ---------------- NOTES ---------------- */
+$('btnNotes').onclick = openNotes;
+function openNotes(){
+  $('inTitle').value = doc.title || ''; $('inNotes').value = doc.notes || ''; $('inLocation').value = doc.location || '';
+  $('notesSheet').classList.remove('hidden');
+}
+function readNotes(){ doc.title = $('inTitle').value.trim(); doc.notes = $('inNotes').value.trim(); doc.location = $('inLocation').value.trim(); save(); }
+$('btnNotesDone').onclick = () => { stopDictation(); readNotes(); $('notesSheet').classList.add('hidden'); };
+['inTitle','inNotes','inLocation'].forEach(id => $(id).addEventListener('input', () => { if(doc){ readNotes(); } }));
+document.querySelectorAll('.scrim').forEach(s => s.addEventListener('click', e => {
+  if(e.target !== s) return;
+  if(s.id==='notesSheet'){ stopDictation(); readNotes(); }
+  s.classList.add('hidden');
+}));
+
+/* In-browser dictation is offered only where the browser supports it.
+   The iPhone keyboard microphone is the dependable path and always works. */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+if(SR && !(standalone && /iPhone|iPad/.test(navigator.userAgent))){
+  $('btnMic').classList.remove('hidden');
+  $('dictHint').textContent = 'Or use the microphone key on your keyboard.';
+}
+$('btnMic').onclick = () => rec ? stopDictation() : startDictation();
+function startDictation(){
+  try{
+    rec = new SR(); rec.continuous = true; rec.interimResults = false; rec.lang = navigator.language || 'en-US';
+    const ta = $('inNotes');
+    rec.onresult = ev => {
+      for(let i=ev.resultIndex;i<ev.results.length;i++){
+        if(!ev.results[i].isFinal) continue;
+        let t = ev.results[i][0].transcript.trim(); if(!t) continue;
+        const cur = ta.value; t = t.charAt(0).toUpperCase() + t.slice(1);
+        ta.value = cur + (cur && !/\s$/.test(cur) ? ' ' : '') + t + (/[.!?]$/.test(t) ? '' : '.');
+        readNotes();
+      }
+    };
+    rec.onend = () => { rec = null; $('btnMic').classList.remove('live'); $('btnMic').querySelector('span').textContent = 'Dictate'; };
+    rec.onerror = () => { toast('Dictation is not available here. Use the keyboard microphone instead.'); };
+    rec.start(); $('btnMic').classList.add('live'); $('btnMic').querySelector('span').textContent = 'Stop';
+  }catch(e){ rec = null; toast('Dictation is not available here. Use the keyboard microphone instead.'); }
+}
+function stopDictation(){ if(rec){ try{ rec.stop(); }catch(e){} } }
+
+/* ---------------- EXPORT ---------------- */
+function stamp(d){ const p = n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`; }
+function baseName(){ const t = (doc.title||'').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-').slice(0,40); return ['Tyrtrek', t || 'Markup', stamp(new Date(doc.createdAt||Date.now()))].join('_'); }
+function wrap(x, text, maxW){
+  const out = [];
+  String(text).split(/\n/).forEach(par => {
+    const words = par.split(/\s+/).filter(Boolean); let line = '';
+    if(!words.length){ out.push(''); return; }
+    words.forEach(w => { const t = line ? line + ' ' + w : w; if(x.measureText(t).width > maxW && line){ out.push(line); line = w; } else line = t; });
+    out.push(line);
+  });
+  return out;
+}
+/* Flattened image, optionally with a caption strip under it. */
+function renderComposite(outW, withCaption){
+  const s = outW / doc.w, outH = Math.round(doc.h * s);
+  const font = `-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif`;
+  let capH = 0, lines = [], fs = 0, pad = 0, tfs = 0, ffs = 0;
+  const meas = document.createElement('canvas').getContext('2d');
+  const brand = lsGet('mk.brand','');
+  const when = new Date(doc.createdAt || Date.now()).toLocaleString([], { year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+  const footer = [when, doc.location, brand].filter(Boolean).join('   ·   ');
+  if(withCaption){
+    fs = Math.max(13, outW/52); tfs = fs*1.22; ffs = fs*0.78; pad = fs*1.25;
+    meas.font = `400 ${fs}px ${font}`;
+    lines = doc.notes ? wrap(meas, doc.notes, outW - pad*2) : [];
+    capH = pad + (doc.title ? tfs*1.45 : 0) + lines.length*fs*1.42 + (lines.length ? fs*0.4 : 0) + ffs*1.6 + pad*0.8;
+  }
+  const c = document.createElement('canvas'); c.width = outW; c.height = outH + Math.round(capH);
+  const x = c.getContext('2d');
+  x.imageSmoothingQuality = 'high';
+  x.save(); x.scale(s, s); x.drawImage(getBase(), 0, 0); drawAll(x, s); x.restore();
+  if(withCaption){
+    x.fillStyle = '#ffffff'; x.fillRect(0, outH, outW, capH);
+    x.fillStyle = '#c17a4f'; x.fillRect(0, outH, outW, Math.max(3, fs*0.22));
+    let y = outH + pad;
+    x.textBaseline = 'top'; x.textAlign = 'left';
+    if(doc.title){ x.fillStyle = '#1c2430'; x.font = `700 ${tfs}px ${font}`; x.fillText(doc.title, pad, y); y += tfs*1.45; }
+    x.fillStyle = '#2b3440'; x.font = `400 ${fs}px ${font}`;
+    lines.forEach(l => { x.fillText(l, pad, y); y += fs*1.42; });
+    if(lines.length) y += fs*0.4;
+    x.fillStyle = '#6b7684'; x.font = `600 ${ffs}px ${font}`; x.fillText(footer, pad, y);
+  }
+  return c;
+}
+function notesText(imgName){
+  const when = new Date(doc.createdAt || Date.now()).toLocaleString();
+  return [doc.title || 'Photo notes', '', doc.notes || '(no notes)', '', 'Location: ' + (doc.location || '—'), 'Taken: ' + when, 'Image: ' + imgName, lsGet('mk.brand','')].filter((l,i,a)=> !(i===a.length-1 && !l)).join('\n');
+}
+function canvasBlob(c, q){ return new Promise(res => c.toBlob(res, 'image/jpeg', q)); }
+async function buildFiles(){
+  const mode = shareOpts.notes;
+  const outW = shareOpts.size === 'full' ? doc.w : Math.min(doc.w, +shareOpts.size);
+  const withCap = (mode === 'caption' || mode === 'both') && !!(doc.notes || doc.title);
+  const c = renderComposite(outW, withCap);
+  const blob = await canvasBlob(c, shareOpts.size === '1600' ? 0.82 : 0.88);
+  const name = baseName() + '.jpg';
+  const files = [new File([blob], name, { type:'image/jpeg' })];
+  if((mode === 'file' || mode === 'both') && (doc.notes || doc.title)){
+    files.push(new File([notesText(name)], baseName() + '_notes.txt', { type:'text/plain' }));
+  }
+  return { files, c, blob };
+}
+async function refreshPreview(){
+  const mode = shareOpts.notes;
+  document.querySelectorAll('#noteMode button').forEach(b => b.classList.toggle('on', b.dataset.v === mode));
+  document.querySelectorAll('#sizeMode button').forEach(b => b.classList.toggle('on', b.dataset.v === shareOpts.size));
+  const { c, blob, files } = await buildFiles();
+  const pv = $('prevImg'); if(pv._url) URL.revokeObjectURL(pv._url);
+  pv._url = URL.createObjectURL(blob); pv.src = pv._url;
+  const kb = blob.size/1024;
+  $('prevMeta').textContent = `${c.width} × ${c.height} px · ${kb > 1024 ? (kb/1024).toFixed(1)+' MB' : Math.round(kb)+' KB'}` + (files.length > 1 ? ' · + notes file' : '') + (!(doc.notes||doc.title) ? ' · no notes added yet' : '');
+}
+$('btnDone').onclick = () => { sel = null; draw(); $('inBrand').value = lsGet('mk.brand',''); $('shareSheet').classList.remove('hidden'); refreshPreview(); };
+$('noteMode').onclick = e => { const b = e.target.closest('button'); if(!b) return; shareOpts.notes = b.dataset.v; lsSet('mk.notes', b.dataset.v); refreshPreview(); };
+$('sizeMode').onclick = e => { const b = e.target.closest('button'); if(!b) return; shareOpts.size = b.dataset.v; lsSet('mk.sizeMode', b.dataset.v); refreshPreview(); };
+$('inBrand').addEventListener('change', () => { lsSet('mk.brand', $('inBrand').value.trim()); refreshPreview(); });
+
+function download(blob, name){ const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000); }
+$('btnShare').onclick = async () => {
+  const { files } = await buildFiles();
+  const data = { files, title: doc.title || 'Marked-up photo' };
+  if((files.length > 1 || doc.notes) && doc.notes) data.text = (doc.title ? doc.title + '\n' : '') + doc.notes;
+  // Some apps refuse a mixed bundle; fall back to the image alone.
+  const tryShare = async d => { if(!(navigator.canShare && navigator.canShare(d))) return 'unsupported'; try{ await navigator.share(d); return 'ok'; }catch(e){ return e && e.name === 'AbortError' ? 'cancel' : 'fail'; } };
+  let r = await tryShare(data);
+  if(r === 'unsupported' || r === 'fail'){ const d2 = { files:[files[0]], title:data.title }; r = await tryShare(d2); if(r === 'ok' && files.length > 1) toast('Image sent. This app would not take the notes file, so use Copy notes.'); }
+  if(r === 'unsupported' || r === 'fail'){ files.forEach((f,i)=> setTimeout(()=>download(f, f.name), i*400)); toast('Saved to your device.'); }
+};
+$('btnSave').onclick = async () => { const { files } = await buildFiles(); files.forEach((f,i)=> setTimeout(()=>download(f, f.name), i*400)); toast(files.length > 1 ? 'Image and notes saved.' : 'Image saved.'); };
+$('btnCopy').onclick = async () => {
+  const t = (doc.title ? doc.title + '\n' : '') + (doc.notes || '');
+  if(!t.trim()){ toast('No notes yet. Tap Notes to add some.'); return; }
+  try{ await navigator.clipboard.writeText(t); toast('Notes copied.'); }catch(e){ toast('Could not copy on this device.'); }
+};
+
+/* Hand off to the Field Capture library shared by the Tyrtrek tools. */
+async function toCapture(track){
+  if(!window.TT || !TT.newFinding){ toast('Field Capture tools did not load. Check your connection once and try again.'); return; }
+  try{
+    const c = renderComposite(Math.min(doc.w, 2000), false);
+    const url = c.toDataURL('image/jpeg', 0.88);
+    const f = TT.newFinding({ track, site: doc.location || '' });
+    const p = TT.newPhoto(url, c.width, c.height);
+    if(doc.title){ p.caption = { enabled:true, text: doc.title }; }
+    f.photos.push(p);
+    f.fields.vulnerability.text = doc.notes || doc.title || '';
+    await TT.dbPut('findings', f);
+    toast('Added to Field Capture as a ' + (track==='residential' ? 'residential' : 'facility') + ' finding.');
+  }catch(e){ toast('Could not add it to Field Capture on this device.'); }
+}
+$('btnToCaptureFac').onclick = () => toCapture('commercial');
+$('btnToCaptureRes').onclick = () => toCapture('residential');
+
+/* ---------------- START ---------------- */
+if(standalone) $('installTip').classList.add('hidden');
+renderRecent();
+if('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+</script>
+</body>
+</html>
